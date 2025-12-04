@@ -1,3 +1,96 @@
+<?php
+session_start();
+require_once('config.php');
+
+$errors = [];
+$old_data = [];
+
+// Check for previous errors from redirect
+if(isset($_SESSION['errors'])) {
+    $errors = $_SESSION['errors'];
+    unset($_SESSION['errors']);
+}
+if(isset($_SESSION['old_data'])) {
+    $old_data = $_SESSION['old_data'];
+    unset($_SESSION['old_data']);
+}
+
+// Process form submission
+if(isset($_POST['submit'])){
+    $name = mysqli_real_escape_string($connection, $_POST['name']);
+    $phone = mysqli_real_escape_string($connection, $_POST['phone']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+    $user_type = mysqli_real_escape_string($connection, $_POST['user_type']);
+
+    // Validation
+    if(empty($name) || empty($phone) || empty($password)){
+        $errors[] = "All fields are required";
+    }
+    
+    if(!preg_match('/^[0-9]{10,15}$/', $phone)){
+        $errors[] = "Please enter a valid phone number (10-15 digits)";
+    }
+    
+    if($password !== $confirm_password){
+        $errors[] = "Passwords do not match";
+    }
+    
+    if(strlen($password) < 6){
+        $errors[] = "Password must be at least 6 characters long";
+    }
+    
+    // Check if phone already exists
+    $check_sql = "SELECT user_id FROM User WHERE phone = '$phone'";
+    $check_result = mysqli_query($connection, $check_sql);
+    
+    if(mysqli_num_rows($check_result) > 0){
+        $errors[] = "Phone number already registered";
+    }
+    
+    // If no errors, insert data
+    if(empty($errors)){
+        // Hash password
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        
+        // Insert into database
+        $sql = "INSERT INTO User (name, phone, password, user_type) 
+                VALUES ('$name', '$phone', '$hashed_password', '$user_type')";
+        
+        if(mysqli_query($connection, $sql)){
+            $user_id = mysqli_insert_id($connection);
+            
+            // Set session variables
+            $_SESSION['user_id'] = $user_id;
+            $_SESSION['name'] = $name;
+            $_SESSION['user_type'] = $user_type;
+            $_SESSION['phone'] = $phone;
+            $_SESSION['logged_in'] = true;
+            
+            // Redirect based on user type
+            switch($user_type){
+                case 'Admin':
+                    header("Location: admin_dashboard.php");
+                    break;
+                case 'Delivery':
+                    header("Location: delivery_dashboard.php");
+                    break;
+                case 'Customer':
+                default:
+                    header("Location: customer_dashboard.php");
+                    break;
+            }
+            exit();
+        } else {
+            $errors[] = "Registration failed: " . mysqli_error($connection);
+            $old_data = $_POST;
+        }
+    } else {
+        $old_data = $_POST;
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,19 +116,36 @@
                 <p>Join our food community today</p>
             </div>
 
-            <form action="../php/signup_process.php" method="POST" class="auth-form">
+            <!-- Display Errors -->
+            <?php if(!empty($errors)): ?>
+                <div class="error-alert">
+                    <ul>
+                        <?php foreach($errors as $error): ?>
+                            <li><?php echo htmlspecialchars($error); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <form action="signup.php" method="POST" class="auth-form">
                 <div class="form-group">
                     <label for="name">
                         <i class="fas fa-user"></i> Full Name
                     </label>
-                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                    <input type="text" id="name" name="name" 
+                           placeholder="Enter your full name" 
+                           value="<?php echo isset($old_data['name']) ? htmlspecialchars($old_data['name']) : ''; ?>" 
+                           required>
                 </div>
 
                 <div class="form-group">
                     <label for="phone">
                         <i class="fas fa-phone"></i> Phone Number
                     </label>
-                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+                    <input type="tel" id="phone" name="phone" 
+                           placeholder="Enter your phone number" 
+                           value="<?php echo isset($old_data['phone']) ? htmlspecialchars($old_data['phone']) : ''; ?>" 
+                           required>
                     <small class="hint">We'll use this for login and notifications</small>
                 </div>
 
@@ -44,7 +154,8 @@
                         <i class="fas fa-lock"></i> Password
                     </label>
                     <div class="password-input">
-                        <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+                        <input type="password" id="password" name="password" 
+                               placeholder="Create a strong password" required>
                         <button type="button" class="toggle-password">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -56,7 +167,8 @@
                     <label for="confirm_password">
                         <i class="fas fa-lock"></i> Confirm Password
                     </label>
-                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter your password" required>
+                    <input type="password" id="confirm_password" name="confirm_password" 
+                           placeholder="Re-enter your password" required>
                 </div>
 
                 <div class="form-group">
@@ -64,8 +176,12 @@
                         <i class="fas fa-user-tag"></i> Account Type
                     </label>
                     <select id="user_type" name="user_type">
-                        <option value="Customer">Customer - Order Food</option>
-                        <option value="Delivery">Delivery Partner - Deliver Orders</option>
+                        <option value="Customer" <?php echo (isset($old_data['user_type']) && $old_data['user_type'] == 'Customer') ? 'selected' : ''; ?>>
+                            Customer - Order Food
+                        </option>
+                        <option value="Delivery" <?php echo (isset($old_data['user_type']) && $old_data['user_type'] == 'Delivery') ? 'selected' : ''; ?>>
+                            Delivery Partner - Deliver Orders
+                        </option>
                     </select>
                     <small class="hint">Admin accounts require verification</small>
                 </div>
@@ -82,7 +198,7 @@
                 </button>
 
                 <div class="auth-footer">
-                    <p>Already have an account? <a href="login.html">Login here</a></p>
+                    <p>Already have an account? <a href="login.php">Login here</a></p>
                 </div>
             </form>
 

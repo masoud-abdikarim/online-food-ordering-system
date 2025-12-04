@@ -32,12 +32,13 @@
                     </ul>
                 </nav>
                 <div class="header-actions">
-                    <div class="cart-icon">
+                    <div class="cart-icon" onclick="window.location.href='login.html'">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count">0</span>
                     </div>
-                    <a href="html/login.html" class="btn-login"><i class="fas fa-sign-in-alt"></i> LOGIN</a>
-                    <a href="html/signup.html" class="btn-signup"><i class="fas fa-user-plus"></i> SIGN UP</a>
+                <!-- Change these links in your index.html header -->
+<a href="php/login.php" class="btn-login"><i class="fas fa-sign-in-alt"></i> LOGIN</a>
+<a href="php/signup.php" class="btn-signup"><i class="fas fa-user-plus"></i> SIGN UP</a>
                 </div>
                 <div class="hamburger">
                     <span></span>
@@ -48,24 +49,6 @@
         </div>
     </header>
 
-    <!-- Cart Sidebar -->
-    <div class="cart-sidebar">
-        <div class="cart-header">
-            <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
-            <button class="close-cart">&times;</button>
-        </div>
-        <div class="cart-items">
-            <!-- Cart items will be added here dynamically -->
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span>Total:</span>
-                <span class="total-price">$0.00</span>
-            </div>
-            <button class="btn-checkout">Proceed to Checkout</button>
-        </div>
-    </div>
-
     <!-- Hero Section -->
     <section class="hero" id="home">
         <div class="container">
@@ -73,10 +56,10 @@
                 <div class="hero-text">
                     <span class="hero-subtitle">Authentic Taste Experience</span>
                     <h2>Delicious Traditional Cuisine <span class="highlight">Awaits You</span></h2>
-                    <p>Experience the rich flavors of traditional recipes passed down through generations. Our chefs combine authentic techniques with fresh, locally-sourced ingredients to bring you an unforgettable dining experience.</p>
+                    <p>Experience the rich flavors of traditional recipes passed down through generations. Our chefs combine authentic techniques with fresh, locally-sourced ingredients.</p>
                     <div class="hero-buttons">
-                        <a href="#menu" class="btn btn-primary"><i class="fas fa-utensils"></i> Explore Menu</a>
-                        <a href="#contact" class="btn btn-secondary"><i class="fas fa-phone-alt"></i> Order Now</a>
+                        <a href="signup.html" class="btn btn-primary"><i class="fas fa-user-plus"></i> Get Started</a>
+                        <a href="#menu" class="btn btn-secondary"><i class="fas fa-utensils"></i> View Menu</a>
                     </div>
                     <div class="hero-stats">
                         <div class="stat">
@@ -106,7 +89,7 @@
         </div>
     </section>
 
-    <!-- Top List Section -->
+    <!-- Featured Menu Section -->
     <section class="top-list" id="menu">
         <div class="container">
             <div class="section-header">
@@ -114,197 +97,50 @@
                 <h2>Premium Menu Selection</h2>
                 <p>Handcrafted with passion and served with perfection</p>
             </div>
-            <div class="menu-filters">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="main">Main Course</button>
-                <button class="filter-btn" data-filter="special">Specialties</button>
-                <button class="filter-btn" data-filter="dessert">Desserts</button>
-            </div>
             <div class="menu-grid">
-                <!-- Chicken Dish -->
-                <div class="menu-card" data-category="main">
+                <!-- Sample Menu Items (Limited for landing page) -->
+                <div class="menu-card">
                     <div class="card-image">
                         <img src="https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Traditional Chicken">
-                        <div class="card-badge">Best Seller</div>
-                        <div class="rating">★★★★☆ 4.5</div>
+                        <div class="card-badge">Popular</div>
                     </div>
                     <div class="card-content">
                         <h3>Traditional Chicken Platter</h3>
-                        <p>Succulent chicken marinated in traditional spices, slow-cooked to perfection. Served with aromatic rice and fresh salad. A family favorite for generations.</p>
-                        <div class="card-details">
-                            <span><i class="fas fa-fire"></i> 450 cal</span>
-                            <span><i class="fas fa-clock"></i> 25 min</span>
-                            <span><i class="fas fa-pepper-hot"></i> Medium</span>
-                        </div>
+                        <p>Succulent chicken marinated in traditional spices, slow-cooked to perfection.</p>
                         <div class="card-footer">
                             <span class="price">$18.99</span>
-                            <button class="btn-add" data-item="Traditional Chicken Platter" data-price="18.99"><i class="fas fa-plus"></i> Add</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Suqaar Dish -->
-                <div class="menu-card featured" data-category="special">
-                    <div class="featured-badge">Chef's Choice</div>
+                <div class="menu-card">
                     <div class="card-image">
                         <img src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Suqaar Special">
-                        <div class="rating">★★★★★ 4.8</div>
                     </div>
                     <div class="card-content">
                         <h3>Suqaar Special</h3>
-                        <p>Authentic Somali suqaar - tender beef cubes sautéed with bell peppers, onions, and traditional spices. Served with anjero bread or rice.</p>
-                        <div class="card-details">
-                            <span><i class="fas fa-fire"></i> 520 cal</span>
-                            <span><i class="fas fa-clock"></i> 30 min</span>
-                            <span><i class="fas fa-pepper-hot"></i> Spicy</span>
-                        </div>
+                        <p>Authentic Somali suqaar - tender beef cubes sautéed with traditional spices.</p>
                         <div class="card-footer">
                             <span class="price">$22.99</span>
-                            <button class="btn-add" data-item="Suqaar Special" data-price="22.99"><i class="fas fa-plus"></i> Add</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Rice Dish -->
-                <div class="menu-card" data-category="main">
-                    <div class="card-image">
-                        <img src="https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Aromatic Rice">
-                        <div class="card-badge">Vegetarian</div>
-                        <div class="rating">★★★★☆ 4.3</div>
-                    </div>
-                    <div class="card-content">
-                        <h3>Aromatic Basmati Rice</h3>
-                        <p>Fragrant basmati rice cooked with saffron, cardamom, and cloves. Garnished with fried onions, raisins, and almonds for a perfect side dish.</p>
-                        <div class="card-details">
-                            <span><i class="fas fa-fire"></i> 350 cal</span>
-                            <span><i class="fas fa-clock"></i> 20 min</span>
-                            <span><i class="fas fa-seedling"></i> Veggie</span>
-                        </div>
-                        <div class="card-footer">
-                            <span class="price">$14.99</span>
-                            <button class="btn-add" data-item="Aromatic Basmati Rice" data-price="14.99"><i class="fas fa-plus"></i> Add</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fish Dish -->
-                <div class="menu-card" data-category="special">
+                <div class="menu-card">
                     <div class="card-image">
                         <img src="https://images.unsplash.com/photo-1563379926898-05f4575a45d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Grilled Fish">
-                        <div class="card-badge">Fresh Catch</div>
-                        <div class="rating">★★★★☆ 4.6</div>
                     </div>
                     <div class="card-content">
                         <h3>Grilled Red Snapper</h3>
-                        <p>Fresh red snapper marinated in lemon herb sauce, grilled to perfection. Served with garlic butter sauce and seasonal vegetables.</p>
-                        <div class="card-details">
-                            <span><i class="fas fa-fire"></i> 380 cal</span>
-                            <span><i class="fas fa-clock"></i> 35 min</span>
-                            <span><i class="fas fa-fish"></i> Seafood</span>
-                        </div>
+                        <p>Fresh red snapper marinated in lemon herb sauce, grilled to perfection.</p>
                         <div class="card-footer">
                             <span class="price">$26.99</span>
-                            <button class="btn-add" data-item="Grilled Red Snapper" data-price="26.99"><i class="fas fa-plus"></i> Add</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Additional Dishes -->
-                <div class="menu-card" data-category="main">
-                    <div class="card-image">
-                        <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Lamb Kebab">
-                        <div class="rating">★★★★★ 4.9</div>
-                    </div>
-                    <div class="card-content">
-                        <h3>Premium Lamb Kebab</h3>
-                        <p>Tender lamb chunks marinated in yogurt and spices, skewered and grilled over charcoal. Served with fresh mint sauce.</p>
-                        <div class="card-details">
-                            <span><i class="fas fa-fire"></i> 480 cal</span>
-                            <span><i class="fas fa-clock"></i> 40 min</span>
-                            <span><i class="fas fa-drumstick-bite"></i> Premium</span>
-                        </div>
-                        <div class="card-footer">
-                            <span class="price">$24.99</span>
-                            <button class="btn-add" data-item="Premium Lamb Kebab" data-price="24.99"><i class="fas fa-plus"></i> Add</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="menu-card" data-category="dessert">
-                    <div class="card-image">
-                        <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Traditional Dessert">
-                        <div class="card-badge">Sweet</div>
-                        <div class="rating">★★★★☆ 4.7</div>
-                    </div>
-                    <div class="card-content">
-                        <h3>Halo Halo Delight</h3>
-                        <p>Traditional mixed dessert with sweet beans, jellies, fruits, and shaved ice, topped with leche flan and ice cream.</p>
-                        <div class="card-details">
-                            <span><i class="fas fa-fire"></i> 320 cal</span>
-                            <span><i class="fas fa-clock"></i> 15 min</span>
-                            <span><i class="fas fa-ice-cream"></i> Cold</span>
-                        </div>
-                        <div class="card-footer">
-                            <span class="price">$8.99</span>
-                            <button class="btn-add" data-item="Halo Halo Delight" data-price="8.99"><i class="fas fa-plus"></i> Add</button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="view-all">
-                <a href="#menu" class="btn btn-outline">View Full Menu <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Dish Section -->
-    <section class="featured-dish">
-        <div class="container">
-            <div class="featured-content">
-                <div class="featured-image">
-                    <img src="https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Premium Chicken Dish">
-                    <div class="image-overlay">
-                        <div class="overlay-content">
-                            <span class="dish-tag">Today's Special</span>
-                            <h3>Traditional Chicken Feast</h3>
-                            <p>50% OFF for First Orders</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="featured-text">
-                    <span class="featured-subtitle">Chef's Masterpiece</span>
-                    <h2>Signature Chicken Platter</h2>
-                    <p>Our signature dish features free-range chicken marinated for 24 hours in a secret blend of 15 traditional spices, slow-roasted in a clay oven for maximum tenderness and flavor.</p>
-                    <div class="dish-details">
-                        <div class="detail">
-                            <i class="fas fa-clock"></i>
-                            <div>
-                                <h4>Preparation Time</h4>
-                                <p>45 minutes</p>
-                            </div>
-                        </div>
-                        <div class="detail">
-                            <i class="fas fa-users"></i>
-                            <div>
-                                <h4>Serves</h4>
-                                <p>2-3 People</p>
-                            </div>
-                        </div>
-                        <div class="detail">
-                            <i class="fas fa-star"></i>
-                            <div>
-                                <h4>Rating</h4>
-                                <p>4.8/5.0</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="featured-price">
-                        <span class="original-price">$36.99</span>
-                        <span class="current-price">$29.99</span>
-                        <span class="discount">20% OFF</span>
-                    </div>
-                    <button class="btn btn-featured">Order Now <i class="fas fa-bolt"></i></button>
-                </div>
+                <a href="login.html" class="btn btn-outline">Login to Order <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
     </section>
@@ -323,24 +159,14 @@
                         <i class="fas fa-motorcycle"></i>
                     </div>
                     <h3>Fast Delivery</h3>
-                    <p>30-minute delivery guarantee to ensure your food arrives hot and fresh at your doorstep</p>
-                    <span class="service-badge">Free on orders $25+</span>
+                    <p>30-minute delivery guarantee to ensure your food arrives hot and fresh</p>
                 </div>
                 <div class="service-item">
                     <div class="service-icon">
                         <i class="fas fa-utensils"></i>
                     </div>
                     <h3>Premium Quality</h3>
-                    <p>All ingredients are locally sourced, organic, and prepared by certified master chefs</p>
-                    <span class="service-badge">100% Fresh</span>
-                </div>
-                <div class="service-item">
-                    <div class="service-icon">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <h3>Easy Booking</h3>
-                    <p>Reserve tables for special occasions with our easy online booking system</p>
-                    <span class="service-badge">24/7 Available</span>
+                    <p>All ingredients are locally sourced, organic, and prepared by certified chefs</p>
                 </div>
                 <div class="service-item">
                     <div class="service-icon">
@@ -348,97 +174,6 @@
                     </div>
                     <h3>24/7 Support</h3>
                     <p>Round-the-clock customer service to assist with orders and inquiries</p>
-                    <span class="service-badge">Instant Response</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials -->
-    <section class="testimonials">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-subtitle">Customer Stories</span>
-                <h2>What Our Customers Say</h2>
-            </div>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Customer">
-                        <div>
-                            <h4>Sarah Johnson</h4>
-                            <span>Food Blogger</span>
-                        </div>
-                    </div>
-                    <p>"The Traditional Chicken Platter is absolutely divine! The flavors are authentic and rich. Best delivery experience I've had!"</p>
-                    <div class="stars">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <img src="https://randomuser.me/api/portraits/men/54.jpg" alt="Customer">
-                        <div>
-                            <h4>Michael Chen</h4>
-                            <span>Regular Customer</span>
-                        </div>
-                    </div>
-                    <p>"Consistently excellent quality. The Suqaar Special has become our family's Friday night tradition!"</p>
-                    <div class="stars">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section class="contact" id="contact">
-        <div class="container">
-            <div class="contact-content">
-                <div class="contact-info">
-                    <h2>Ready to Taste Excellence?</h2>
-                    <p>Order now or visit our restaurant for an unforgettable dining experience</p>
-                    <div class="contact-details">
-                        <div class="contact-item">
-                            <i class="fas fa-phone"></i>
-                            <div>
-                                <h4>Call Us</h4>
-                                <p>+1 (555) 123-4567</p>
-                            </div>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-clock"></i>
-                            <div>
-                                <h4>Opening Hours</h4>
-                                <p>Mon-Sun: 10AM - 11PM</p>
-                            </div>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <div>
-                                <h4>Visit Us</h4>
-                                <p>123 Food Street, Gourmet City</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="contact-form">
-                    <h3>Quick Order Form</h3>
-                    <form id="orderForm">
-                        <input type="text" placeholder="Your Name" required>
-                        <input type="tel" placeholder="Phone Number" required>
-                        <textarea placeholder="Special Instructions (optional)" rows="3"></textarea>
-                        <button type="submit" class="btn btn-primary">Place Order Now</button>
-                    </form>
                 </div>
             </div>
         </div>
@@ -451,12 +186,6 @@
                 <div class="footer-section">
                     <h3><i class="fas fa-utensils"></i> Ateye albailk</h3>
                     <p>Serving authentic traditional cuisine with modern excellence since 2010.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-tiktok"></i></a>
-                    </div>
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
@@ -470,22 +199,13 @@
                 <div class="footer-section">
                     <h4>Contact Info</h4>
                     <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> 123 Food Street, Gourmet City</li>
                         <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
                         <li><i class="fas fa-envelope"></i> info@ateyealbailk.com</li>
                     </ul>
                 </div>
-                <div class="footer-section">
-                    <h4>Newsletter</h4>
-                    <p>Subscribe for updates and special offers</p>
-                    <div class="newsletter">
-                        <input type="email" placeholder="Your Email">
-                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Ateye albailk. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+                <p>&copy; 2025 Ateye albailk. All rights reserved.</p>
             </div>
         </div>
     </footer>
