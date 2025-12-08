@@ -2235,12 +2235,3 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
     </script>
 </body>
 </html>
-// Admin view of currently assigned deliveries
-$assigned_orders_admin_sql = "SELECT o.*, u.name as customer_name, d.status as delivery_status, u2.name as delivery_person_name 
-                              FROM delivery d 
-                              JOIN orders o ON d.order_id = o.order_id 
-                              JOIN user u ON o.user_id = u.user_id 
-                              LEFT JOIN user u2 ON d.delivery_person_id = u2.user_id 
-                              WHERE d.status IN ('Assigned','Picked Up','On the Way') 
-                              ORDER BY o.order_date DESC";
-$assigned_orders_admin_result = mysqli_query($connection, $assigned_orders_admin_sql);
