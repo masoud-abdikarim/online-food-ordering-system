@@ -1,8 +1,8 @@
 <?php
 require_once('config.php');
 
-// This should be run only once to create the first admin
-// After that, only existing admin can create new admin accounts from dashboard
+// ONE-TIME USE: Create additional admin
+// Delete this file after use for security
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = mysqli_real_escape_string($connection, $_POST['name']);
@@ -10,14 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     
-    // Check if admin already exists
-    $check_sql = "SELECT COUNT(*) as admin_count FROM User WHERE user_type = 'Admin'";
-    $check_result = mysqli_query($connection, $check_sql);
-    $check_row = mysqli_fetch_assoc($check_result);
-    
-    if ($check_row['admin_count'] > 0) {
-        $error = "Admin already exists! Contact existing admin to create new admin accounts.";
-    } elseif ($password !== $confirm_password) {
+    if ($password !== $confirm_password) {
         $error = "Passwords do not match!";
     } elseif (strlen($password) < 6) {
         $error = "Password must be at least 6 characters long!";
@@ -27,7 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 VALUES ('$name', '$phone', '$hashed_password', 'Admin')";
         
         if (mysqli_query($connection, $sql)) {
-            $success = "Admin account created successfully! You can now login.";
+            $success = "Admin account created successfully!";
+            // Auto-delete this file after successful creation (optional)
+            // unlink(__FILE__);
         } else {
             $error = "Error: " . mysqli_error($connection);
         }
@@ -40,19 +35,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create First Admin - Ateye albailk</title>
+    <title>Create Additional Admin - ONE TIME USE</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/auth.css">
+    <style>
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: #856404;
+        }
+        .warning-box h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+    </style>
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-card">
+            <div class="warning-box">
+                <h3>⚠️ ONE TIME USE ONLY</h3>
+                <p>This page is for creating additional admin accounts. Delete this file after use for security.</p>
+            </div>
+            
             <div class="auth-header">
                 <div class="logo">
                     <i class="fas fa-user-shield"></i>
-                    <h1>Create First Admin</h1>
+                    <h1>Create Admin Account</h1>
                 </div>
-                <p>Create the first administrator account for the system</p>
+                <p>Create additional administrator account</p>
             </div>
             
             <?php if(isset($error)): ?>
@@ -61,6 +75,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             <?php if(isset($success)): ?>
                 <div class="alert alert-success"><?php echo $success; ?></div>
+                <div class="warning-box">
+                    <p><strong>IMPORTANT:</strong> Please delete this file (create_admin_again.php) now for security!</p>
+                </div>
             <?php endif; ?>
             
             <form method="POST" class="auth-form">
