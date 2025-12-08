@@ -1,3 +1,45 @@
+<?php
+session_start();
+require_once('config.php');
+$errors = [];
+$old_data = [];
+if (isset($_POST['submit'])) {
+    $name = mysqli_real_escape_string($connection, $_POST['name']);
+    $phone = mysqli_real_escape_string($connection, $_POST['phone']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+    $terms = isset($_POST['terms']);
+    $user_type = 'Customer';
+    if (empty($name) || empty($phone) || empty($password) || empty($confirm_password)) { $errors[] = "All fields are required"; }
+    if (!preg_match('/^[0-9]{10,15}$/', $phone)) { $errors[] = "Please enter a valid phone number (10-15 digits)"; }
+    if ($password !== $confirm_password) { $errors[] = "Passwords do not match"; }
+    if (strlen($password) < 6) { $errors[] = "Password must be at least 6 characters long"; }
+    if (!$terms) { $errors[] = "You must agree to the Terms of Service and Privacy Policy"; }
+    $old_data = ['name' => $name, 'phone' => $phone];
+    if (empty($errors)) {
+        $check_sql = "SELECT user_id FROM User WHERE phone = '$phone'";
+        $check_res = mysqli_query($connection, $check_sql);
+        if (mysqli_num_rows($check_res) > 0) {
+            $errors[] = "Phone number is already registered";
+        } else {
+            $hashed = password_hash($password, PASSWORD_DEFAULT);
+            $insert_sql = "INSERT INTO User (name, phone, password, user_type) VALUES ('$name', '$phone', '$hashed', '$user_type')";
+            if (mysqli_query($connection, $insert_sql)) {
+                $user_id = mysqli_insert_id($connection);
+                $_SESSION['user_id'] = $user_id;
+                $_SESSION['name'] = $name;
+                $_SESSION['user_type'] = $user_type;
+                $_SESSION['phone'] = $phone;
+                $_SESSION['logged_in'] = true;
+                header("Location: customer_dashboard.php");
+                exit();
+            } else {
+                $errors[] = "Error creating account";
+            }
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,18 +175,11 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="user_type">
+                        <label>
                             <i class="fas fa-user-tag"></i> Account Type
                         </label>
-                        <select id="user_type" name="user_type">
-                            <option value="Customer" <?php echo (isset($old_data['user_type']) && $old_data['user_type'] == 'Customer') ? 'selected' : ''; ?>>
-                                Customer - Order Food
-                            </option>
-                            <option value="Delivery" <?php echo (isset($old_data['user_type']) && $old_data['user_type'] == 'Delivery') ? 'selected' : ''; ?>>
-                                Delivery Partner - Deliver Orders
-                            </option>
-                        </select>
-                        <small class="hint">Admin accounts require verification</small>
+                        <input type="text" value="Customer" readonly>
+                        <input type="hidden" name="user_type" value="Customer">
                     </div>
 
                     <div class="form-group terms">

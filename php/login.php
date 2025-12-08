@@ -83,74 +83,206 @@ if(isset($_POST['submit'])){
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Add this CSS to match the sign-up layout */
+        .auth-card {
+            display: flex;
+            flex-direction: row;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            width: 100%;
+            min-height: 600px;
+        }
+        
+        .auth-content {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            min-width: 350px;
+        }
+        
+        .auth-image {
+            flex: 1;
+            position: relative;
+            min-width: 300px;
+        }
+        
+        .auth-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .auth-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .logo i {
+            font-size: 32px;
+            color: #d4a574;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            color: #d4a574;
+            margin: 0;
+        }
+        
+        .auth-header h2 {
+            font-size: 32px;
+            color: #333;
+            margin: 10px 0 5px 0;
+        }
+        
+        .auth-header p {
+            color: #666;
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: color 0.3s;
+        }
+        
+        .back-home:hover {
+            color: #d4a574;
+        }
+        
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            padding: 40px;
+            color: white;
+        }
+        
+        .image-overlay h3 {
+            font-size: 24px;
+            margin: 0 0 10px 0;
+        }
+        
+        .image-overlay p {
+            font-size: 16px;
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 768px) {
+            .auth-card {
+                flex-direction: column;
+                min-height: auto;
+            }
+            
+            .auth-content, .auth-image {
+                min-width: 100%;
+            }
+            
+            .auth-image {
+                height: 250px;
+                order: -1;
+            }
+            
+            .auth-header, .auth-form {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-card">
-            <div class="auth-header">
-                <a href="../index.html" class="back-home">
-                    <i class="fas fa-arrow-left"></i> Back to Home
-                </a>
-                <div class="logo">
-                    <i class="fas fa-utensils"></i>
-                    <h1>Ateye albailk</h1>
+            <!-- Left side: Form content -->
+            <div class="auth-content">
+                <!-- Header at the top -->
+                <div class="auth-header">
+                    <a href="../index.html" class="back-home">
+                        <i class="fas fa-arrow-left"></i> Back to Home
+                    </a>
+                    <div class="logo">
+                        <i class="fas fa-utensils"></i>
+                        <h1>Ateye albailk</h1>
+                    </div>
+                    <h2>Welcome Back!</h2>
+                    <p>Login to your account to continue</p>
                 </div>
-                <h2>Welcome Back!</h2>
-                <p>Login to your account to continue</p>
+
+                <!-- Display Errors -->
+                <?php if(!empty($errors)): ?>
+                    <div class="error-alert">
+                        <ul>
+                            <?php foreach($errors as $error): ?>
+                                <li><?php echo htmlspecialchars($error); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Login Form -->
+                <form action="login.php" method="POST" class="auth-form">
+                    <div class="form-group">
+                        <label for="phone">
+                            <i class="fas fa-phone"></i> Phone Number
+                        </label>
+                        <input type="tel" id="phone" name="phone" 
+                               placeholder="Enter your phone number" 
+                               value="<?php echo htmlspecialchars($old_phone); ?>" 
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <div class="password-input">
+                            <input type="password" id="password" name="password" 
+                                   placeholder="Enter your password" required>
+                            <button type="button" class="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group remember-forgot">
+                        <div class="remember">
+                            <input type="checkbox" id="remember" name="remember">
+                            <label for="remember">Remember me</label>
+                        </div>
+                        <a href="forgot_password.php" class="forgot">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" name="submit" class="btn-auth">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+
+                    <div class="auth-footer">
+                        <p>Don't have an account? <a href="signup.php">Sign up here</a></p>
+                    </div>
+                </form>
             </div>
 
-            <!-- Display Errors -->
-            <?php if(!empty($errors)): ?>
-                <div class="error-alert">
-                    <ul>
-                        <?php foreach($errors as $error): ?>
-                            <li><?php echo htmlspecialchars($error); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-
-            <form action="login.php" method="POST" class="auth-form">
-                <div class="form-group">
-                    <label for="phone">
-                        <i class="fas fa-phone"></i> Phone Number
-                    </label>
-                    <input type="tel" id="phone" name="phone" 
-                           placeholder="Enter your phone number" 
-                           value="<?php echo htmlspecialchars($old_phone); ?>" 
-                           required>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">
-                        <i class="fas fa-lock"></i> Password
-                    </label>
-                    <div class="password-input">
-                        <input type="password" id="password" name="password" 
-                               placeholder="Enter your password" required>
-                        <button type="button" class="toggle-password">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-group remember-forgot">
-                    <div class="remember">
-                        <input type="checkbox" id="remember" name="remember">
-                        <label for="remember">Remember me</label>
-                    </div>
-                    <a href="forgot_password.php" class="forgot">Forgot Password?</a>
-                </div>
-
-                <button type="submit" name="submit" class="btn-auth">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </button>
-
-                <div class="auth-footer">
-                    <p>Don't have an account? <a href="signup.php">Sign up here</a></p>
-                </div>
-            </form>
-
+            <!-- Right side: Image -->
             <div class="auth-image">
                 <img src="https://images.unsplash.com/photo-1565299507177-b0ac66763828?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Food Delivery">
                 <div class="image-overlay">
@@ -176,6 +308,24 @@ if(isset($_POST['submit'])){
                     icon.className = 'fas fa-eye';
                 }
             });
+        });
+        
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            
+            if(!phone) {
+                e.preventDefault();
+                alert('Please enter your phone number');
+                return false;
+            }
+            
+            if(!password) {
+                e.preventDefault();
+                alert('Please enter your password');
+                return false;
+            }
         });
     </script>
 </body>
