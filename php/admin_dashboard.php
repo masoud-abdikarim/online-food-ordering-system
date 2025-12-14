@@ -1119,6 +1119,11 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
                     </a>
                 </li>
                 <li>
+                    <a href="admin_profile.php">
+                        <i class="fas fa-user-shield"></i> Profile
+                    </a>
+                </li>
+                <li>
                     <a href="logout.php">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
