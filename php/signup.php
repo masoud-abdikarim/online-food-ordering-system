@@ -17,13 +17,13 @@ if (isset($_POST['submit'])) {
     if (!$terms) { $errors[] = "You must agree to the Terms of Service and Privacy Policy"; }
     $old_data = ['name' => $name, 'phone' => $phone];
     if (empty($errors)) {
-        $check_sql = "SELECT user_id FROM User WHERE phone = '$phone'";
+        $check_sql = "SELECT user_id FROM user WHERE phone = '$phone'";
         $check_res = mysqli_query($connection, $check_sql);
-        if (mysqli_num_rows($check_res) > 0) {
+        if ($check_res && mysqli_num_rows($check_res) > 0) {
             $errors[] = "Phone number is already registered";
         } else {
             $hashed = password_hash($password, PASSWORD_DEFAULT);
-            $insert_sql = "INSERT INTO User (name, phone, password, user_type) VALUES ('$name', '$phone', '$hashed', '$user_type')";
+            $insert_sql = "INSERT INTO user (name, phone, password, user_type) VALUES ('$name', '$phone', '$hashed', '$user_type')";
             if (mysqli_query($connection, $insert_sql)) {
                 $user_id = mysqli_insert_id($connection);
                 $_SESSION['user_id'] = $user_id;

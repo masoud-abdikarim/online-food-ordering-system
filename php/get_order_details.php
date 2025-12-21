@@ -26,9 +26,9 @@ $sql = "SELECT
     d.assigned_at,
     d.delivered_at
 FROM orders o
-JOIN User u ON o.user_id = u.user_id
-LEFT JOIN Address a ON o.order_id = a.order_id
-LEFT JOIN Delivery d ON o.order_id = d.order_id AND d.delivery_person_id = $user_id
+JOIN user u ON o.user_id = u.user_id
+LEFT JOIN address a ON o.order_id = a.order_id
+LEFT JOIN delivery d ON o.order_id = d.order_id AND d.delivery_person_id = $user_id
 WHERE o.order_id = $order_id";
 
 $result = mysqli_query($connection, $sql);
@@ -44,8 +44,8 @@ $items_sql = "SELECT
     mi.name as item_name,
     mi.price as item_price,
     mi.image_url
-FROM OrderItem oi
-JOIN MenuItem mi ON oi.item_id = mi.item_id
+FROM orderitem oi
+JOIN menuitem mi ON oi.item_id = mi.item_id
 WHERE oi.order_id = $order_id";
 
 $items_result = mysqli_query($connection, $items_sql);

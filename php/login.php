@@ -27,10 +27,10 @@ if(isset($_POST['submit'])){
     
     if(empty($errors)){
         // Check user exists
-        $sql = "SELECT * FROM User WHERE phone = '$phone'";
+        $sql = "SELECT * FROM user WHERE phone = '$phone'";
         $result = mysqli_query($connection, $sql);
         
-        if(mysqli_num_rows($result) == 1){
+        if($result && mysqli_num_rows($result) == 1){
             $user = mysqli_fetch_assoc($result);
             
             // Verify password

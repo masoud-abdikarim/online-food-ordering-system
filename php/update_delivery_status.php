@@ -12,13 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $status = mysqli_real_escape_string($connection, $_POST['status']);
     
     // Update delivery status
-    $sql = "UPDATE Delivery SET status = '$status' WHERE delivery_id = $delivery_id";
+    $sql = "UPDATE delivery SET status = '$status' WHERE delivery_id = $delivery_id";
     
     if (mysqli_query($connection, $sql)) {
         // If delivered, also update order status
         if ($status == 'Delivered') {
             $order_sql = "UPDATE orders SET status = 'Delivered' 
-                         WHERE order_id = (SELECT order_id FROM Delivery WHERE delivery_id = $delivery_id)";
+                         WHERE order_id = (SELECT order_id FROM delivery WHERE delivery_id = $delivery_id)";
             mysqli_query($connection, $order_sql);
         }
         

@@ -33,10 +33,10 @@ if (!empty($search)) {
 
 // Get user's orders
 $orders_sql = "SELECT o.*, 
-               (SELECT COUNT(*) FROM OrderItem oi WHERE oi.order_id = o.order_id) as item_count,
+               (SELECT COUNT(*) FROM orderitem oi WHERE oi.order_id = o.order_id) as item_count,
                (SELECT GROUP_CONCAT(m.name SEPARATOR ', ') 
-                FROM OrderItem oi 
-                JOIN MenuItem m ON oi.menu_item_id = m.item_id 
+                FROM orderitem oi 
+                JOIN menuitem m ON oi.menu_item_id = m.item_id 
                 WHERE oi.order_id = o.order_id LIMIT 2) as item_names
                FROM orders o 
                WHERE $where_clause 

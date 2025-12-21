@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = "Password must be at least 6 characters long!";
     } else {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $sql = "INSERT INTO User (name, phone, password, user_type) 
+        $sql = "INSERT INTO user (name, phone, password, user_type) 
                 VALUES ('$name', '$phone', '$hashed_password', 'Admin')";
         
         if (mysqli_query($connection, $sql)) {

@@ -22,7 +22,7 @@ if ($order_id == 0) {
 // Get order details
 $order_sql = "SELECT o.*, u.name as customer_name, u.phone as customer_phone 
               FROM orders o 
-              JOIN User u ON o.user_id = u.user_id 
+              JOIN user u ON o.user_id = u.user_id 
               WHERE o.order_id = $order_id AND o.user_id = $user_id";
 $order_result = mysqli_query($connection, $order_sql);
 
@@ -35,15 +35,15 @@ $order = mysqli_fetch_assoc($order_result);
 
 // Get order items
 $items_sql = "SELECT oi.*, m.name as item_name, m.image_url 
-              FROM OrderItem oi 
-              JOIN MenuItem m ON oi.menu_item_id = m.item_id 
+              FROM orderitem oi 
+              JOIN menuitem m ON oi.menu_item_id = m.item_id 
               WHERE oi.order_id = $order_id";
 $items_result = mysqli_query($connection, $items_sql);
 
 // Get delivery info if exists
 $delivery_sql = "SELECT d.*, u.name as delivery_person_name 
-                 FROM Delivery d 
-                 LEFT JOIN User u ON d.delivery_person_id = u.user_id 
+                 FROM delivery d 
+                 LEFT JOIN user u ON d.delivery_person_id = u.user_id 
                  WHERE d.order_id = $order_id";
 $delivery_result = mysqli_query($connection, $delivery_sql);
 $delivery = mysqli_num_rows($delivery_result) > 0 ? mysqli_fetch_assoc($delivery_result) : null;

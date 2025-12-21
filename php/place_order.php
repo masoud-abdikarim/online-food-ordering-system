@@ -39,7 +39,7 @@ try {
         if ($menu_item_id <= 0 || $quantity <= 0) {
             throw new Exception('Invalid item or quantity');
         }
-        $price_sql = "SELECT price FROM MenuItem WHERE item_id = $menu_item_id AND is_available = TRUE";
+        $price_sql = "SELECT price FROM menuitem WHERE item_id = $menu_item_id AND is_available = TRUE";
         $price_res = mysqli_query($connection, $price_sql);
         if (!$price_res || mysqli_num_rows($price_res) === 0) {
             $removed_items[] = $menu_item_id;
@@ -86,7 +86,7 @@ try {
     $order_id = mysqli_insert_id($connection);
     
     if (!empty($address) || !empty($city) || !empty($postal_code)) {
-        $address_sql = "INSERT INTO Address (order_id, address, city, postal_code) 
+        $address_sql = "INSERT INTO address (order_id, address, city, postal_code) 
                         VALUES ($order_id, '$address', '$city', '$postal_code')";
         mysqli_query($connection, $address_sql);
     }
@@ -96,7 +96,7 @@ try {
         $quantity = $vi['quantity'];
         $price = $vi['price'];
 
-        $item_sql = "INSERT INTO OrderItem (order_id, menu_item_id, quantity, price) 
+        $item_sql = "INSERT INTO orderitem (order_id, menu_item_id, quantity, price) 
                      VALUES ($order_id, $menu_item_id, $quantity, $price)";
 
         if (!mysqli_query($connection, $item_sql)) {
