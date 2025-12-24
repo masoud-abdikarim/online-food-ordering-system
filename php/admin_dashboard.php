@@ -3,13 +3,16 @@ session_start();
 require_once('config.php');
 
 // Check if user is logged in and is admin
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Admin') {
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type']) || $_SESSION['user_type'] != 'Admin') {
     header("Location: login.php");
     exit();
 }
 
-$user_id = $_SESSION['user_id'];
-$user_name = $_SESSION['name'];
+// Safely get session variables with defaults
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+$user_name = isset($_SESSION['name']) ? $_SESSION['name'] : 'Administrator';
+$user_phone = isset($_SESSION['phone']) ? $_SESSION['phone'] : '';
+$user_type = isset($_SESSION['user_type']) ? $_SESSION['user_type'] : 'Admin';
 
 // Process actions
 $message = '';
@@ -74,6 +77,7 @@ if (isset($_POST['create_user'])) {
 }
 
 // 2. UPDATE USER
+// 2. UPDATE USER
 if (isset($_POST['update_user'])) {
     $user_id_update = intval($_POST['user_id']);
     $name = mysqli_real_escape_string($connection, $_POST['name']);
@@ -81,7 +85,7 @@ if (isset($_POST['update_user'])) {
     $user_type = mysqli_real_escape_string($connection, $_POST['user_type']);
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     
-    // Don't allow current admin to change their own role
+    // Don't allow current admin to change their own role or deactivate themselves
     if ($user_id_update == $_SESSION['user_id']) {
         $user_type = 'Admin'; // Force admin role for current user
         $is_active = 1; // Can't deactivate yourself
@@ -348,6 +352,17 @@ $delivery_personnel_sql = "SELECT u.*,
                            FROM user u 
                            WHERE u.user_type = 'Delivery' AND u.is_active = TRUE";
 $delivery_personnel_result = mysqli_query($connection, $delivery_personnel_sql);
+
+// Get currently assigned deliveries for admin view
+$assigned_orders_admin_sql = "SELECT o.order_id, o.total_amount, u.name as customer_name, 
+                              u2.name as delivery_person_name, d.status as delivery_status
+                              FROM orders o 
+                              JOIN user u ON o.user_id = u.user_id 
+                              LEFT JOIN delivery d ON d.order_id = o.order_id 
+                              LEFT JOIN user u2 ON d.delivery_person_id = u2.user_id 
+                              WHERE d.status IN ('Assigned','Picked Up','On the Way')
+                              ORDER BY o.order_date DESC";
+$assigned_orders_admin_result = mysqli_query($connection, $assigned_orders_admin_sql);
 
 // Get categories
 $categories_sql = "SELECT DISTINCT category FROM menuitem WHERE category IS NOT NULL AND category != ''";
@@ -1119,8 +1134,8 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
                     </a>
                 </li>
                 <li>
-                    <a href="admin_profile.php">
-                        <i class="fas fa-user-shield"></i> Profile
+                    <a href="#assigned-deliveries" onclick="showSection('assigned-deliveries')">
+                        <i class="fas fa-truck"></i> Assigned Deliveries
                     </a>
                 </li>
                 <li>
@@ -1549,8 +1564,8 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
             </div>
         </div>
 
-        <!-- Currently Assigned Deliveries -->
-        <div class="section" id="assigned-deliveries" style="display: block;">
+        <!-- Section 6: Assigned Deliveries -->
+        <div id="assigned-deliveries" class="section" style="display: none;">
             <div class="section-header">
                 <h2>Currently Assigned Deliveries</h2>
             </div>
@@ -1590,7 +1605,7 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
             </div>
         </div>
 
-        <!-- Section 6: All Orders -->
+        <!-- Section 7: All Orders -->
         <div id="orders-list" class="section" style="display: none;">
             <div class="section-header">
                 <h2>All Customer Orders</h2>
@@ -1655,7 +1670,7 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
             </div>
         </div>
 
-        <!-- Section 7: Order History -->
+        <!-- Section 8: Order History -->
         <div id="order-history" class="section" style="display: none;">
             <div class="section-header">
                 <h2>Order History</h2>
@@ -2172,19 +2187,25 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
             }
         }
         
-        function submitDeactivate() {
-            if (userToDeactivate) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.innerHTML = `
-                    <input type="hidden" name="user_id" value="${userToDeactivate}">
-                    <input type="hidden" name="is_active" value="0">
-                    <input type="hidden" name="update_user" value="1">
-                `;
-                document.body.appendChild(form);
-                form.submit();
-            }
+    function submitDeactivate() {
+    if (userToDeactivate) {
+        if (confirm('Are you sure you want to deactivate this user?')) {
+            // Use the delete_user endpoint which will deactivate if deletion fails
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.style.display = 'none';
+            
+            const userIdInput = document.createElement('input');
+            userIdInput.type = 'hidden';
+            userIdInput.name = 'delete_id';
+            userIdInput.value = userToDeactivate;
+            form.appendChild(userIdInput);
+            
+            document.body.appendChild(form);
+            form.submit();
         }
+    }
+}
         
         // Close modals on outside click
         window.onclick = function(event) {

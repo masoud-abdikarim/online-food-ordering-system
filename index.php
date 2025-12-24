@@ -77,7 +77,7 @@
                 </div>
                 <div class="hero-image">
                     <div class="image-container">
-                        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Traditional Chicken Dish">
+                        <img src="https://imgs.search.brave.com/3JsMsidMGV6YBKCYkCTcq_1szy7ikuxRYwN7vF0hgmg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/c291dGhlcm5saXZp/bmcuY29tL3RobWIv/TkprdmpuQVpDNURN/REVkNDhIN1lLNDhX/ak5JPS8xNTAweDAv/ZmlsdGVyczpub191/cHNjYWxlKCk6bWF4/X2J5dGVzKDE1MDAw/MCk6c3RyaXBfaWNj/KCkvYmFrZWRfYmFy/YmVjdWVfY2hpY2tl/bl8wODctMjAwMC03/ZGViNDUzM2M4NGQ0/ZGU3YjM3NzhjN2Y3/Zjk0NDA2ZS5qcGc" alt="Traditional Chicken Dish">
                         <div class="floating-badge">
                             <i class="fas fa-star"></i>
                             <span>Chef's Special</span>
