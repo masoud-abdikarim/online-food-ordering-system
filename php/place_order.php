@@ -20,10 +20,6 @@ if (!$data) {
 mysqli_begin_transaction($connection);
 
 try {
-    $address = isset($data['address']) ? mysqli_real_escape_string($connection, $data['address']) : '';
-    $city = isset($data['city']) ? mysqli_real_escape_string($connection, $data['city']) : '';
-    $postal_code = isset($data['postal_code']) ? mysqli_real_escape_string($connection, $data['postal_code']) : '';
-    $instructions = isset($data['instructions']) ? mysqli_real_escape_string($connection, $data['instructions']) : '';
     $payment_method = isset($data['payment_method']) ? mysqli_real_escape_string($connection, $data['payment_method']) : '';
 
     if (!isset($data['items']) || !is_array($data['items']) || count($data['items']) === 0) {
@@ -67,12 +63,8 @@ try {
     $tax = $subtotal * 0.10;
     $total_amount = $subtotal + $delivery_fee + $tax;
 
-    // Map client payment method to status enum without storing payment_method
-    // DB enum: ('Pending','Paid','Failed') — set 'Pending' by default
     $payment_status = 'Pending';
     if ($payment_method && in_array(strtolower($payment_method), ['card','digital'])) {
-        // In real card/digital flow, this becomes 'Paid' after gateway confirmation.
-        // For now, keep as 'Pending' to avoid false positives.
         $payment_status = 'Pending';
     }
     
@@ -85,11 +77,15 @@ try {
     
     $order_id = mysqli_insert_id($connection);
     
+    // SKIP ADDRESS INSERTION FOR NOW - FIX TABLE LATER
+    // Address insertion commented out to avoid errors
+    /*
     if (!empty($address) || !empty($city) || !empty($postal_code)) {
         $address_sql = "INSERT INTO address (order_id, address, city, postal_code) 
                         VALUES ($order_id, '$address', '$city', '$postal_code')";
         mysqli_query($connection, $address_sql);
     }
+    */
     
     foreach ($validated_items as $vi) {
         $menu_item_id = $vi['id'];

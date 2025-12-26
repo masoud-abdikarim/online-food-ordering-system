@@ -19,7 +19,11 @@ if (isset($_POST['submit'])) {
     if (empty($errors)) {
         $check_sql = "SELECT user_id FROM user WHERE phone = '$phone'";
         $check_res = mysqli_query($connection, $check_sql);
-        if ($check_res && mysqli_num_rows($check_res) > 0) {
+        
+        if (!$check_res) {
+            error_log("Database error in signup check: " . mysqli_error($connection));
+            $errors[] = "System error. Please try again later.";
+        } elseif (mysqli_num_rows($check_res) > 0) {
             $errors[] = "Phone number is already registered";
         } else {
             $hashed = password_hash($password, PASSWORD_DEFAULT);

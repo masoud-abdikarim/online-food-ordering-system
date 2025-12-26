@@ -30,7 +30,10 @@ if(isset($_POST['submit'])){
         $sql = "SELECT * FROM user WHERE phone = '$phone'";
         $result = mysqli_query($connection, $sql);
         
-        if($result && mysqli_num_rows($result) == 1){
+        if(!$result) {
+            error_log("Database error in login: " . mysqli_error($connection));
+            $errors[] = "System error. Please try again later.";
+        } elseif(mysqli_num_rows($result) == 1){
             $user = mysqli_fetch_assoc($result);
             
             // Verify password

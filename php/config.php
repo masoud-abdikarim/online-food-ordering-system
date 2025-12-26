@@ -3,15 +3,25 @@ if (!extension_loaded('mysqli')) {
     http_response_code(500);
     exit('Server missing MySQLi extension.');
 }
-$host = "Localhost";
-$user = "root";
-$password = "maskax470";
-$database = "ateye";
-$connection = @mysqli_connect($host, $user, $password, $database);
+
+// Database configuration
+// IMPORTANT: Update these credentials for your InfinityFree account
+$host = "sql110.infinityfree.com";
+$user = "if0_40761766";
+$password = "maskax470"; // <-- put your real vPanel password
+$database = "if0_40761766_ateye";
+
+// Enable error reporting for debugging (disable in production)
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+
+$connection = mysqli_connect($host, $user, $password, $database);
+
 if (!$connection) {
     http_response_code(500);
+    // Log error to a file instead of displaying it
     error_log("DB connection failed: " . mysqli_connect_error());
-    exit('Database connection error.');
+    exit('Database connection error. Please check your configuration.');
 }
+
 mysqli_set_charset($connection, 'utf8mb4');
-?>
