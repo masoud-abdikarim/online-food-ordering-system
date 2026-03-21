@@ -12,6 +12,13 @@ $user_type = isset($_SESSION['user_type']) ? $_SESSION['user_type'] : 'Admin';
 $message = '';
 $error = '';
 
+// Post-redirect messages (workflow)
+if (isset($_GET['msg']) && $_GET['msg'] === 'approved') {
+    $message = 'Order approved. Open <strong>Dispatch</strong> — the order is waiting for a driver assignment.';
+} elseif (isset($_GET['msg']) && $_GET['msg'] === 'rejected') {
+    $message = 'Order was rejected.';
+}
+
 // ========== USER MANAGEMENT FUNCTIONS ==========
 
 // 1. CREATE USER (Admin/Delivery/Customer)
@@ -218,9 +225,10 @@ if (isset($_POST['approve_order'])) {
     if (!$st_row || $st_row['status'] !== 'Pending') {
         $error = 'Only pending orders can be approved or rejected.';
     } elseif ($action == 'approve') {
-        $sql = "UPDATE orders SET status = 'Preparing' WHERE order_id = $order_id";
+        $sql = "UPDATE orders SET status = 'Approved' WHERE order_id = $order_id";
         if (mysqli_query($connection, $sql)) {
-            $message = 'Order approved and moved to preparation!';
+            header('Location: admin_dashboard.php?section=delivery-assignment&msg=approved');
+            exit();
         } else {
             $error = mysqli_error($connection);
         }
@@ -228,7 +236,8 @@ if (isset($_POST['approve_order'])) {
         $sql = "UPDATE orders SET status = 'Rejected' WHERE order_id = $order_id";
         if (mysqli_query($connection, $sql)) {
             mysqli_query($connection, "DELETE FROM delivery WHERE order_id = $order_id");
-            $message = 'Order rejected!';
+            header('Location: admin_dashboard.php?section=order-approval&msg=rejected');
+            exit();
         } else {
             $error = mysqli_error($connection);
         }
@@ -239,7 +248,7 @@ if (isset($_POST['approve_order'])) {
 if (isset($_POST['admin_update_order_status'])) {
     $order_id = intval($_POST['order_id']);
     $new_status = isset($_POST['new_status']) ? mysqli_real_escape_string($connection, $_POST['new_status']) : '';
-    $allowed = ['Pending', 'Preparing', 'On the way', 'Delivered', 'Rejected'];
+    $allowed = ['Pending', 'Approved', 'Assigned', 'Preparing', 'On the way', 'Delivered', 'Rejected'];
     if (!in_array($new_status, $allowed, true)) {
         $error = 'Invalid order status.';
     } else {
@@ -267,7 +276,11 @@ if (isset($_POST['admin_update_order_status'])) {
 if (isset($_POST['assign_delivery'])) {
     $order_id = intval($_POST['order_id']);
     $delivery_person_id = intval($_POST['delivery_person_id']);
-    if ($delivery_person_id <= 0) {
+    $ord_chk = mysqli_query($connection, "SELECT status FROM orders WHERE order_id = $order_id");
+    $ord_row = $ord_chk ? mysqli_fetch_assoc($ord_chk) : null;
+    if (!$ord_row || $ord_row['status'] !== 'Approved') {
+        $error = 'Order must be Approved and waiting for assignment before dispatch.';
+    } elseif ($delivery_person_id <= 0) {
         $error = 'Please select a delivery person.';
     } else {
         $busy_sql = "SELECT COUNT(*) AS cnt FROM delivery 
@@ -285,7 +298,8 @@ if (isset($_POST['assign_delivery'])) {
                 $sql = "INSERT INTO delivery (order_id, delivery_person_id, status) 
                         VALUES ($order_id, $delivery_person_id, 'Assigned')";
                 if (mysqli_query($connection, $sql)) {
-                    $message = 'Delivery assigned successfully!';
+                    mysqli_query($connection, "UPDATE orders SET status = 'Assigned' WHERE order_id = $order_id");
+                    $message = 'Delivery assigned — order is now with the driver.';
                 } else {
                     $error = 'Error: ' . mysqli_error($connection);
                 }
@@ -414,20 +428,17 @@ $all_users_result = mysqli_query($connection, $all_users_sql);
 // Get pending orders for approval
 $pending_orders_sql = "SELECT o.*, u.name as customer_name 
                       FROM orders o 
-                      JOIN user u ON o.user_id = u.user_id 
+                      JOIN `user` u ON o.user_id = u.user_id 
                       WHERE o.status = 'Pending' 
                       ORDER BY o.order_date DESC";
 $pending_orders_result = mysqli_query($connection, $pending_orders_sql);
 
-// Get preparing orders for delivery assignment
+// Approved, waiting for a driver (no delivery row yet — order must stay visible here)
 $preparing_orders_sql = "SELECT o.*, u.name as customer_name 
                          FROM orders o 
-                         JOIN user u ON o.user_id = u.user_id 
-                         WHERE o.status = 'Preparing' 
-                         AND o.order_id NOT IN (
-                            SELECT order_id FROM delivery 
-                            WHERE status IN ('Assigned','Picked Up','On the way')
-                         )
+                         JOIN `user` u ON o.user_id = u.user_id 
+                         WHERE o.status = 'Approved' 
+                         AND NOT EXISTS (SELECT 1 FROM delivery d WHERE d.order_id = o.order_id)
                          ORDER BY o.order_date DESC";
 $preparing_orders_result = mysqli_query($connection, $preparing_orders_sql);
 
@@ -436,17 +447,17 @@ $delivery_personnel_sql = "SELECT u.*,
                            (SELECT COUNT(*) FROM delivery d 
                             WHERE d.delivery_person_id = u.user_id 
                             AND d.status IN ('Assigned','Picked Up','On the way')) AS active_deliveries 
-                           FROM user u 
+                           FROM `user` u 
                            WHERE u.user_type = 'Delivery' AND u.is_active = TRUE";
 $delivery_personnel_result = mysqli_query($connection, $delivery_personnel_sql);
 
 // Get currently assigned deliveries for admin view
-$assigned_orders_admin_sql = "SELECT o.order_id, o.total_amount, u.name as customer_name, 
+$assigned_orders_admin_sql = "SELECT o.order_id, o.total_amount, o.status as order_status, u.name as customer_name, 
                               u2.name as delivery_person_name, d.status as delivery_status
                               FROM orders o 
-                              JOIN user u ON o.user_id = u.user_id 
-                              LEFT JOIN delivery d ON d.order_id = o.order_id 
-                              LEFT JOIN user u2 ON d.delivery_person_id = u2.user_id 
+                              JOIN `user` u ON o.user_id = u.user_id 
+                              INNER JOIN delivery d ON d.order_id = o.order_id 
+                              LEFT JOIN `user` u2 ON d.delivery_person_id = u2.user_id 
                               WHERE d.status IN ('Assigned','Picked Up','On the way')
                               ORDER BY o.order_date DESC";
 $assigned_orders_admin_result = mysqli_query($connection, $assigned_orders_admin_sql);
@@ -463,40 +474,40 @@ $all_orders_sql = "SELECT o.*,
                           u2.user_id AS delivery_person_id,
                           u2.name as delivery_person_name 
                    FROM orders o 
-                   JOIN user u ON o.user_id = u.user_id 
+                   JOIN `user` u ON o.user_id = u.user_id 
                    LEFT JOIN delivery d ON d.order_id = o.order_id 
-                   LEFT JOIN user u2 ON d.delivery_person_id = u2.user_id 
+                   LEFT JOIN `user` u2 ON d.delivery_person_id = u2.user_id 
                    ORDER BY o.order_date DESC";
 $all_orders_result = mysqli_query($connection, $all_orders_sql);
 
-// History queries (Approved/Completed)
+// History: completed or rejected only (no “disappearing” orders — they land here when done)
 $history_today_sql = "SELECT o.*, u.name as customer_name, u2.name as delivery_person_name 
                       FROM orders o 
-                      JOIN user u ON o.user_id = u.user_id 
+                      JOIN `user` u ON o.user_id = u.user_id 
                       LEFT JOIN delivery d ON d.order_id = o.order_id 
-                      LEFT JOIN user u2 ON d.delivery_person_id = u2.user_id 
+                      LEFT JOIN `user` u2 ON d.delivery_person_id = u2.user_id 
                       WHERE DATE(o.order_date) = CURDATE() 
-                      AND o.status IN ('Preparing','On the way','Delivered') 
+                      AND o.status IN ('Delivered','Rejected') 
                       ORDER BY o.order_date DESC";
 $history_today_result = mysqli_query($connection, $history_today_sql);
 
 $history_yesterday_sql = "SELECT o.*, u.name as customer_name, u2.name as delivery_person_name 
                           FROM orders o 
-                          JOIN user u ON o.user_id = u.user_id 
+                          JOIN `user` u ON o.user_id = u.user_id 
                           LEFT JOIN delivery d ON d.order_id = o.order_id 
-                          LEFT JOIN user u2 ON d.delivery_person_id = u2.user_id 
+                          LEFT JOIN `user` u2 ON d.delivery_person_id = u2.user_id 
                           WHERE DATE(o.order_date) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) 
-                          AND o.status IN ('Preparing','On the way','Delivered') 
+                          AND o.status IN ('Delivered','Rejected') 
                           ORDER BY o.order_date DESC";
 $history_yesterday_result = mysqli_query($connection, $history_yesterday_sql);
 
 $history_older_sql = "SELECT o.*, u.name as customer_name, u2.name as delivery_person_name 
                       FROM orders o 
-                      JOIN user u ON o.user_id = u.user_id 
+                      JOIN `user` u ON o.user_id = u.user_id 
                       LEFT JOIN delivery d ON d.order_id = o.order_id 
-                      LEFT JOIN user u2 ON d.delivery_person_id = u2.user_id 
+                      LEFT JOIN `user` u2 ON d.delivery_person_id = u2.user_id 
                       WHERE DATE(o.order_date) < DATE_SUB(CURDATE(), INTERVAL 1 DAY) 
-                      AND o.status IN ('Preparing','On the way','Delivered') 
+                      AND o.status IN ('Delivered','Rejected') 
                       ORDER BY o.order_date DESC";
 $history_older_result = mysqli_query($connection, $history_older_sql);
 
@@ -570,27 +581,27 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                 </li>
                 <li>
                     <a href="#order-approval" onclick="showSection('order-approval'); return false;">
-                        <i class="fas fa-check-circle"></i><span>Approvals</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#orders-list" onclick="showSection('orders-list'); return false;">
-                        <i class="fas fa-receipt"></i><span>All Orders</span>
+                        <i class="fas fa-inbox"></i><span>New orders</span>
                     </a>
                 </li>
                 <li>
                     <a href="#delivery-assignment" onclick="showSection('delivery-assignment'); return false;">
-                        <i class="fas fa-motorcycle"></i><span>Dispatch</span>
+                        <i class="fas fa-user-clock"></i><span>Waiting assignment</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#assigned-deliveries" onclick="showSection('assigned-deliveries'); return false;">
+                        <i class="fas fa-truck"></i><span>Active deliveries</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#orders-list" onclick="showSection('orders-list'); return false;">
+                        <i class="fas fa-receipt"></i><span>All orders</span>
                     </a>
                 </li>
                 <li>
                     <a href="#order-history" onclick="showSection('order-history'); return false;">
                         <i class="fas fa-history"></i><span>History</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#assigned-deliveries" onclick="showSection('assigned-deliveries'); return false;">
-                        <i class="fas fa-truck"></i><span>Live deliveries</span>
                     </a>
                 </li>
                 <li>
@@ -911,10 +922,10 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
             </div>
         </div>
 
-        <!-- Section 4: Order Approval -->
+        <!-- Section 4: New orders (Pending) -->
         <div id="order-approval" class="section" style="display: none;">
             <div class="section-header">
-                <h2>Order Approval</h2>
+                <h2>New orders <span style="font-weight:600;font-size:0.85em;color:var(--kaah-muted);">(Pending)</span></h2>
                 <span class="badge" style="background: var(--warning-color); color: white; padding: 5px 10px; border-radius: 10px;">
                     <?php echo $pending_orders_result ? mysqli_num_rows($pending_orders_result) : 0; ?> pending
                 </span>
@@ -976,35 +987,46 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
             </div>
         </div>
 
-        <!-- Section 5: Delivery Assignment -->
+        <!-- Section 5: Waiting for delivery assignment (Approved) -->
         <div id="delivery-assignment" class="section" style="display: none;">
             <div class="section-header">
-                <h2>Delivery Assignment</h2>
+                <h2>Waiting for assignment <span style="font-weight:600;font-size:0.85em;color:var(--kaah-muted);">(Approved)</span></h2>
                 <span class="badge" style="background: var(--secondary-color); color: white; padding: 5px 10px; border-radius: 10px;">
-                    <?php echo $preparing_orders_result ? mysqli_num_rows($preparing_orders_result) : 0; ?> ready for delivery
+                    <?php echo $preparing_orders_result ? mysqli_num_rows($preparing_orders_result) : 0; ?> waiting
                 </span>
             </div>
+            <p class="text-muted" style="margin-bottom:12px;font-size:0.9rem;">
+                After you <strong>approve</strong> a new order, it appears here until you assign a driver. Orders stay in this list — they do not disappear.
+            </p>
             
             <div class="table-responsive">
                 <table class="orders-table">
                     <thead>
                         <tr>
+                            <th>Order #</th>
                             <th>Customer</th>
                             <th>Amount</th>
                             <th>Status</th>
-                            <th>Assign Delivery</th>
+                            <th>Details</th>
+                            <th>Assign driver</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if($preparing_orders_result && mysqli_num_rows($preparing_orders_result) > 0): ?>
                             <?php while($order = mysqli_fetch_assoc($preparing_orders_result)): ?>
                             <tr>
+                                <td><strong>#<?php echo (int)$order['order_id']; ?></strong></td>
                                 <td><?php echo htmlspecialchars($order['customer_name']); ?></td>
                                 <td><strong>$<?php echo number_format($order['total_amount'], 2); ?></strong></td>
                                 <td>
-                                    <span class="status-badge status-preparing">
-                                        <?php echo $order['status']; ?>
+                                    <span class="status-badge status-approved">
+                                        <?php echo htmlspecialchars($order['status']); ?>
                                     </span>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAdminOrderDetail(<?php echo (int)$order['order_id']; ?>)">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
                                 </td>
                                 <td>
                                     <form method="POST" class="assign-delivery-form">
@@ -1031,7 +1053,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="4" class="text-center">No orders ready for delivery assignment</td>
+                                <td colspan="6" class="text-center">No orders waiting for driver assignment. Approve a new order first.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -1039,10 +1061,10 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
             </div>
         </div>
 
-        <!-- Section 6: Assigned Deliveries -->
+        <!-- Section 6: Active deliveries (driver assigned) -->
         <div id="assigned-deliveries" class="section" style="display: none;">
             <div class="section-header">
-                <h2>Currently Assigned Deliveries</h2>
+                <h2>Active deliveries <span style="font-weight:600;font-size:0.85em;color:var(--kaah-muted);">(Assigned / in progress)</span></h2>
             </div>
             <div class="table-responsive">
                 <table class="orders-table">
@@ -1051,8 +1073,9 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                             <th>Order #</th>
                             <th>Customer</th>
                             <th>Amount</th>
-                            <th>Delivery Person</th>
-                            <th>Delivery Status</th>
+                            <th>Order status</th>
+                            <th>Driver</th>
+                            <th>Delivery progress</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1062,6 +1085,11 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                                 <td><?php echo $ao['order_id']; ?></td>
                                 <td><?php echo htmlspecialchars($ao['customer_name']); ?></td>
                                 <td><strong>$<?php echo number_format($ao['total_amount'], 2); ?></strong></td>
+                                <td>
+                                    <span class="status-badge status-<?php echo strtolower(str_replace(' ', '-', $ao['order_status'] ?? '')); ?>">
+                                        <?php echo htmlspecialchars($ao['order_status'] ?? ''); ?>
+                                    </span>
+                                </td>
                                 <td><?php echo htmlspecialchars($ao['delivery_person_name'] ?: '—'); ?></td>
                                 <td>
                                     <span class="status-badge status-<?php echo strtolower(str_replace(' ', '-', $ao['delivery_status'])); ?>">
@@ -1090,7 +1118,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
             </div>
             <div class="table-responsive">
                 <p class="text-muted" style="margin-bottom:12px;font-size:0.9rem;">
-                    Approve pending orders in <strong>Approvals</strong>, assign a driver when status is <strong>Preparing</strong>, or update status / reassign here.
+                    Approve in <strong>New orders</strong> → assign in <strong>Waiting assignment</strong> (Approved). Use this list to change status or reassign drivers.
                 </p>
                 <table class="orders-table">
                     <thead>
@@ -1147,7 +1175,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                                     <form method="POST" style="margin-bottom:8px;">
                                         <input type="hidden" name="order_id" value="<?php echo $oid; ?>">
                                         <select name="new_status" class="form-control" style="padding:6px;font-size:0.85rem;margin-bottom:4px;">
-                                            <?php foreach (['Pending','Preparing','On the way','Delivered','Rejected'] as $st): ?>
+                                            <?php foreach (['Pending','Approved','Assigned','Preparing','On the way','Delivered','Rejected'] as $st): ?>
                                             <option value="<?php echo htmlspecialchars($st); ?>" <?php echo ($order['status'] === $st) ? 'selected' : ''; ?>><?php echo htmlspecialchars($st); ?></option>
                                             <?php endforeach; ?>
                                         </select>
@@ -1155,7 +1183,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                                             <i class="fas fa-sync"></i> Update status
                                         </button>
                                     </form>
-                                    <?php if ($order['status'] === 'Preparing' && !$dst): ?>
+                                    <?php if ($order['status'] === 'Approved' && !$dst): ?>
                                     <form method="POST">
                                         <input type="hidden" name="order_id" value="<?php echo $oid; ?>">
                                         <select name="delivery_person_id" required class="form-control" style="padding:6px;font-size:0.85rem;margin-bottom:4px;">
@@ -1294,7 +1322,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                     </tbody>
                 </table>
 
-                <h3 style="margin-top: 30px;">Older Approved Orders</h3>
+                <h3 style="margin-top: 30px;">Older completed orders</h3>
                 <table class="orders-table">
                     <thead>
                         <tr>
@@ -1876,9 +1904,15 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
             });
         });
         
-        // Show menu display by default
+        // Show menu display by default, or deep-link section from URL (?section=delivery-assignment)
         document.addEventListener('DOMContentLoaded', function() {
-            showSection('menu-display');
+            var p = new URLSearchParams(window.location.search);
+            var sec = p.get('section');
+            if (sec && document.getElementById(sec)) {
+                showSection(sec);
+            } else {
+                showSection('menu-display');
+            }
         });
     </script>
 </body>

@@ -102,6 +102,20 @@ if (table_exists($connection, 'user') && !column_exists($connection, 'user', 'is
     }
 }
 
+// --- orders.status: Approved + Assigned (workflow) ---
+if (table_exists($connection, 'orders')) {
+    if (@mysqli_query($connection, "ALTER TABLE `orders` MODIFY COLUMN `status` ENUM('Pending','Approved','Assigned','Preparing','On the way','Delivered','Rejected') NOT NULL DEFAULT 'Pending'")) {
+        echo "OK: orders.status extended (Approved, Assigned)\n";
+    } else {
+        echo "NOTE orders.status alter: " . mysqli_error($connection) . "\n";
+    }
+    if (table_exists($connection, 'delivery')) {
+        @mysqli_query($connection, "UPDATE `orders` o INNER JOIN `delivery` d ON d.order_id = o.order_id SET o.status = CASE WHEN d.status = 'Delivered' THEN 'Delivered' WHEN d.status = 'On the way' THEN 'On the way' ELSE 'Assigned' END WHERE o.status = 'Preparing'");
+    }
+    @mysqli_query($connection, "UPDATE `orders` SET status = 'Approved' WHERE status = 'Preparing'");
+    echo "OK: legacy Preparing migrated to Approved / Assigned / Delivered\n";
+}
+
 mysqli_query($connection, 'SET FOREIGN_KEY_CHECKS=1');
 
 echo "\nDone. <a href=\"../docs/SYSTEM_REVIEW.md\">docs</a> | <a href=\"login.php\">Login</a>\n";

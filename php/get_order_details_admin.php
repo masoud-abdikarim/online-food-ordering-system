@@ -19,10 +19,10 @@ $sql = "SELECT o.*, u.name AS customer_name, u.phone AS customer_phone,
         d.delivery_id, d.status AS delivery_status, d.assigned_at, d.delivered_at,
         dp.name AS delivery_person_name
         FROM orders o
-        JOIN user u ON o.user_id = u.user_id
+        JOIN `user` u ON o.user_id = u.user_id
         LEFT JOIN address a ON a.order_id = o.order_id
         LEFT JOIN delivery d ON d.order_id = o.order_id
-        LEFT JOIN user dp ON d.delivery_person_id = dp.user_id
+        LEFT JOIN `user` dp ON d.delivery_person_id = dp.user_id
         WHERE o.order_id = $order_id
         LIMIT 1";
 $res = mysqli_query($connection, $sql);

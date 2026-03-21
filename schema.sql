@@ -45,7 +45,7 @@ CREATE TABLE `orders` (
   `user_id` INT UNSIGNED NOT NULL,
   `order_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `total_amount` DECIMAL(10,2) NOT NULL,
-  `status` ENUM('Pending', 'Preparing', 'On the way', 'Delivered', 'Rejected') NOT NULL DEFAULT 'Pending',
+  `status` ENUM('Pending', 'Approved', 'Assigned', 'Preparing', 'On the way', 'Delivered', 'Rejected') NOT NULL DEFAULT 'Pending',
   `payment_status` ENUM('Pending', 'Paid', 'Failed') NOT NULL DEFAULT 'Pending',
   PRIMARY KEY (`order_id`),
   KEY `idx_orders_user_date` (`user_id`, `order_date`),

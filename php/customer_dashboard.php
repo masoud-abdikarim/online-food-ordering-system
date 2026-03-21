@@ -7,12 +7,12 @@ $user_name = $_SESSION['name'];
 
 // Get user's orders by status
 $pending_orders_sql = "SELECT * FROM orders WHERE user_id = $user_id AND status = 'Pending' ORDER BY order_date DESC";
-$preparing_orders_sql = "SELECT * FROM orders WHERE user_id = $user_id AND status = 'Preparing' ORDER BY order_date DESC";
+$preparing_orders_sql = "SELECT * FROM orders WHERE user_id = $user_id AND status = 'Approved' ORDER BY order_date DESC";
 $ontheway_orders_sql = "SELECT o.*, d.delivery_person_id, u.name as delivery_person_name 
                         FROM orders o 
                         LEFT JOIN delivery d ON o.order_id = d.order_id 
-                        LEFT JOIN user u ON d.delivery_person_id = u.user_id 
-                        WHERE o.user_id = $user_id AND o.status = 'On the way' 
+                        LEFT JOIN `user` u ON d.delivery_person_id = u.user_id 
+                        WHERE o.user_id = $user_id AND o.status IN ('Assigned', 'On the way') 
                         ORDER BY o.order_date DESC";
 $delivered_orders_sql = "SELECT * FROM orders WHERE user_id = $user_id AND status = 'Delivered' ORDER BY order_date DESC LIMIT 10";
 $cancelled_orders_sql = "SELECT * FROM orders WHERE user_id = $user_id AND status = 'Rejected' ORDER BY order_date DESC LIMIT 5";
@@ -210,10 +210,10 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                 <i class="fas fa-clock"></i> Pending
             </button>
             <button type="button" class="tab-btn" data-tab="preparing" onclick="showTab('preparing')">
-                <i class="fas fa-utensils"></i> Preparing
+                <i class="fas fa-check-circle"></i> Approved
             </button>
             <button type="button" class="tab-btn" data-tab="ontheway" onclick="showTab('ontheway')">
-                <i class="fas fa-shipping-fast"></i> Track order
+                <i class="fas fa-shipping-fast"></i> Out for delivery
             </button>
             <button type="button" class="tab-btn" data-tab="delivered" onclick="showTab('delivered')">
                 <i class="fas fa-check-circle"></i> Delivered
@@ -247,8 +247,8 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                         // Combine all order results
                         $queries = [
                             'Pending' => $pending_orders_result,
-                            'Preparing' => $preparing_orders_result,
-                            'On the way' => $ontheway_orders_result,
+                            'Approved' => $preparing_orders_result,
+                            'Assigned / Out' => $ontheway_orders_result,
                             'Delivered' => $delivered_orders_result,
                             'Cancelled' => $cancelled_orders_result
                         ];
@@ -280,7 +280,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                             <td><?php echo $item_count; ?> items</td>
                             <td>$<?php echo number_format($order['total_amount'], 2); ?></td>
                             <td>
-                                <span class="status-badge status-<?php echo strtolower(str_replace(' ', '', $order['status'])); ?>">
+                                <span class="status-badge status-<?php echo strtolower(str_replace(' ', '-', $order['status'])); ?>">
                                     <?php echo $order['status']; ?>
                                 </span>
                                 

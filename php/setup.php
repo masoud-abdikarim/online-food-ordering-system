@@ -41,7 +41,7 @@ $tables = [
         `user_id` INT UNSIGNED NOT NULL,
         `order_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         `total_amount` DECIMAL(10,2) NOT NULL,
-        `status` ENUM('Pending', 'Preparing', 'On the way', 'Delivered', 'Rejected') NOT NULL DEFAULT 'Pending',
+        `status` ENUM('Pending', 'Approved', 'Assigned', 'Preparing', 'On the way', 'Delivered', 'Rejected') NOT NULL DEFAULT 'Pending',
         `payment_status` ENUM('Pending', 'Paid', 'Failed') NOT NULL DEFAULT 'Pending',
         PRIMARY KEY (`order_id`),
         KEY `idx_orders_user_date` (`user_id`, `order_date`),
@@ -119,6 +119,11 @@ foreach ($tables as $name => $sql) {
 }
 
 mysqli_query($connection, 'SET FOREIGN_KEY_CHECKS=1');
+
+// Extend orders.status for approval → assignment workflow (idempotent on re-run)
+@mysqli_query($connection, "ALTER TABLE `orders` MODIFY COLUMN `status` ENUM('Pending','Approved','Assigned','Preparing','On the way','Delivered','Rejected') NOT NULL DEFAULT 'Pending'");
+@mysqli_query($connection, "UPDATE `orders` o INNER JOIN `delivery` d ON d.order_id = o.order_id SET o.status = CASE WHEN d.status = 'Delivered' THEN 'Delivered' WHEN d.status = 'On the way' THEN 'On the way' ELSE 'Assigned' END WHERE o.status = 'Preparing'");
+@mysqli_query($connection, "UPDATE `orders` SET status = 'Approved' WHERE status = 'Preparing'");
 
 // Widen image_url for legacy VARCHAR installs
 if (@mysqli_query($connection, "ALTER TABLE menuitem MODIFY COLUMN image_url MEDIUMTEXT NULL")) {
