@@ -311,6 +311,15 @@ if ($result) {
     $stats['pending_orders'] = 0;
 }
 
+// Active menu items (available)
+$sql = "SELECT COUNT(*) as menu_cnt FROM menuitem WHERE is_available = TRUE";
+$result = mysqli_query($connection, $sql);
+if ($result) {
+    $stats['menu_items'] = mysqli_fetch_assoc($result)['menu_cnt'];
+} else {
+    $stats['menu_items'] = 0;
+}
+
 // Get menu items for display (first 8 items)
 $menu_items_sql = "SELECT * FROM menuitem WHERE is_available = TRUE ORDER BY item_id DESC LIMIT 8";
 $menu_items_result = mysqli_query($connection, $menu_items_sql);
