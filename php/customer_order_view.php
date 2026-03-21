@@ -16,11 +16,11 @@ if ($order_id == 0) {
 // Get order details
 $order_sql = "SELECT o.*, u.name as customer_name, u.phone as customer_phone 
               FROM orders o 
-              JOIN user u ON o.user_id = u.user_id 
+              JOIN `user` u ON o.user_id = u.user_id 
               WHERE o.order_id = $order_id AND o.user_id = $user_id";
 $order_result = mysqli_query($connection, $order_sql);
 
-if (mysqli_num_rows($order_result) == 0) {
+if ($order_result === false || mysqli_num_rows($order_result) == 0) {
     header("Location: customer_orders.php");
     exit();
 }
@@ -33,14 +33,20 @@ $items_sql = "SELECT oi.*, m.name as item_name, m.image_url
               JOIN menuitem m ON oi.menu_item_id = m.item_id 
               WHERE oi.order_id = $order_id";
 $items_result = mysqli_query($connection, $items_sql);
+if ($items_result === false) {
+    $items_result = null;
+}
 
 // Get delivery info if exists
 $delivery_sql = "SELECT d.*, u.name as delivery_person_name 
                  FROM delivery d 
-                 LEFT JOIN user u ON d.delivery_person_id = u.user_id 
+                 LEFT JOIN `user` u ON d.delivery_person_id = u.user_id 
                  WHERE d.order_id = $order_id";
 $delivery_result = mysqli_query($connection, $delivery_sql);
-$delivery = mysqli_num_rows($delivery_result) > 0 ? mysqli_fetch_assoc($delivery_result) : null;
+$delivery = null;
+if ($delivery_result !== false && mysqli_num_rows($delivery_result) > 0) {
+    $delivery = mysqli_fetch_assoc($delivery_result);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -169,8 +175,8 @@ $delivery = mysqli_num_rows($delivery_result) > 0 ? mysqli_fetch_assoc($delivery
                     <h3><i class="fas fa-utensils"></i> Order Items</h3>
                     
                     <div class="order-items">
-                        <?php if(mysqli_num_rows($items_result) > 0): ?>
-                            <?php while($item = mysqli_fetch_assoc($items_result)): ?>
+                        <?php if ($items_result && mysqli_num_rows($items_result) > 0): ?>
+                            <?php while ($item = mysqli_fetch_assoc($items_result)): ?>
                             <div class="order-item">
                                 <div class="item-image">
                                     <img src="<?php echo $item['image_url'] ? $item['image_url'] : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'; ?>" 
