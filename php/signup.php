@@ -51,181 +51,339 @@ if (isset($_POST['submit'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Kaah Fast Food</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/auth.css">
+    <title>Register | Kaah Fast Food</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Add this CSS if you don't have it in auth.css */
-        .auth-card {
-            display: flex;
-            flex-direction: row;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 1000px;
-            width: 100%;
-            min-height: 600px;
+        :root {
+            --bg: #fff7f2;
+            --surface: #ffffff;
+            --text: #1f1f29;
+            --muted: #6b6b80;
+            --primary: #ff5a1f;
+            --primary-dark: #dd4712;
+            --line: #ece8e3;
+            --danger-bg: #ffe8e8;
+            --danger-text: #a22929;
         }
-        
-        .auth-content {
-            flex: 1;
-            padding: 40px;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(160deg, #fff7f2 0%, #fff 45%, #fff 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+        .auth-shell {
+            width: min(1080px, 100%);
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: 0 20px 48px rgba(30, 30, 42, 0.12);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .auth-side {
+            padding: 34px;
+            background: linear-gradient(145deg, #ff5a1f 0%, #ff7d37 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 680px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+        .side-copy h2 {
+            font-size: clamp(1.7rem, 2.6vw, 2.3rem);
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+        .side-copy p { opacity: 0.95; max-width: 420px; }
+        .side-points {
+            list-style: none;
+            margin-top: 18px;
+        }
+        .side-points li {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .location-chip {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.35);
+            padding: 8px 12px;
+            border-radius: 999px;
+            width: fit-content;
+            font-size: .9rem;
+        }
+        .auth-main {
+            padding: 34px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            min-width: 350px;
         }
-        
-        .auth-image {
-            flex: 1;
-            position: relative;
-            min-width: 300px;
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
         }
-        
-        .auth-image img {
+        .go-back {
+            text-decoration: none;
+            color: var(--muted);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 9px 12px;
+            font-weight: 600;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .go-back:hover { color: var(--text); border-color: #dad4cd; }
+        .auth-main h1 {
+            font-size: clamp(1.45rem, 2.2vw, 1.9rem);
+            margin-bottom: 6px;
+        }
+        .subtitle { color: var(--muted); margin-bottom: 22px; }
+        .error-alert {
+            background: var(--danger-bg);
+            color: var(--danger-text);
+            border: 1px solid #ffcaca;
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            font-size: .93rem;
+        }
+        .error-alert ul { margin-left: 16px; }
+        .form-group { margin-bottom: 14px; }
+        label {
+            display: block;
+            font-size: .9rem;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+        .input-wrap { position: relative; }
+        .input-wrap i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9a9aac;
+        }
+        .form-control {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px 44px 12px 38px;
+            font-size: .96rem;
+            color: var(--text);
+            background: #fff;
         }
-        
-        @media (max-width: 768px) {
-            .auth-card {
-                flex-direction: column;
-                min-height: auto;
-            }
-            
-            .auth-content, .auth-image {
-                min-width: 100%;
-            }
-            
-            .auth-image {
-                height: 250px;
-                order: -1;
-            }
+        .form-control:focus {
+            outline: none;
+            border-color: #ffb899;
+            box-shadow: 0 0 0 3px #fff0e8;
+        }
+        .plain-input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: .96rem;
+            color: #85859b;
+            background: #fafafa;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #8d8da2;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+        }
+        .hint {
+            display: block;
+            color: var(--muted);
+            font-size: .82rem;
+            margin-top: 6px;
+        }
+        .terms {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            color: var(--muted);
+            font-size: .9rem;
+            margin: 6px 0 16px;
+        }
+        .terms input { accent-color: var(--primary); margin-top: 3px; }
+        .terms a { color: var(--primary-dark); text-decoration: none; }
+        .btn-primary {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff;
+            padding: 12px 16px;
+            font-weight: 800;
+            font-size: .97rem;
+            display: inline-flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .auth-footer {
+            margin-top: 16px;
+            color: var(--muted);
+            text-align: center;
+            font-size: .94rem;
+        }
+        .auth-footer a { color: var(--primary-dark); font-weight: 700; text-decoration: none; }
+
+        @media (max-width: 900px) {
+            .auth-shell { grid-template-columns: 1fr; }
+            .auth-side { min-height: 300px; padding: 26px; }
+            .auth-main { padding: 26px; }
+        }
+        @media (max-width: 560px) {
+            body { padding: 12px; }
+            .auth-main, .auth-side { padding: 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <!-- Left side: Form content -->
-            <div class="auth-content">
-                <div class="auth-header">
-                    <a href="../index.html" class="back-home">
-                        <i class="fas fa-arrow-left"></i> Back to Home
-                    </a>
-                    <div class="logo">
-                        <i class="fas fa-utensils"></i>
-                        <h1>Kaah Fast Food</h1>
+    <div class="auth-shell">
+        <aside class="auth-side">
+            <div class="brand">
+                <i class="fas fa-utensils"></i>
+                <span>Kaah Fast Food</span>
+            </div>
+            <div class="side-copy">
+                <h2>Create your account and order in minutes.</h2>
+                <p>Join Kaah Fast Food today and enjoy a faster ordering experience with full access to your dashboard.</p>
+                <ul class="side-points">
+                    <li><i class="fas fa-check-circle"></i><span>Quick registration</span></li>
+                    <li><i class="fas fa-check-circle"></i><span>Track orders in real-time</span></li>
+                    <li><i class="fas fa-check-circle"></i><span>Built for customers in New Hargeisa</span></li>
+                </ul>
+            </div>
+            <div class="location-chip">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>New Hargeisa</span>
+            </div>
+        </aside>
+
+        <main class="auth-main">
+            <div class="top-actions">
+                <a href="../index.php" class="go-back">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </a>
+            </div>
+
+            <h1>Create your account</h1>
+            <p class="subtitle">Fill in your details to register with Kaah Fast Food.</p>
+
+            <?php if(!empty($errors)): ?>
+                <div class="error-alert">
+                    <ul>
+                        <?php foreach($errors as $error): ?>
+                            <li><?php echo htmlspecialchars($error); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-user"></i>
+                        <input class="form-control" type="text" id="name" name="name"
+                               placeholder="Enter your full name"
+                               value="<?php echo isset($old_data['name']) ? htmlspecialchars($old_data['name']) : ''; ?>"
+                               required>
                     </div>
-                    <h2>Create Your Account</h2>
-                    <p>Join our food community today</p>
                 </div>
 
-                <!-- Display Errors -->
-                <?php if(!empty($errors)): ?>
-                    <div class="error-alert">
-                        <ul>
-                            <?php foreach($errors as $error): ?>
-                                <li><?php echo htmlspecialchars($error); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-phone"></i>
+                        <input class="form-control" type="tel" id="phone" name="phone"
+                               placeholder="Enter phone (6-10 digits)"
+                               value="<?php echo isset($old_data['phone']) ? htmlspecialchars($old_data['phone']) : ''; ?>"
+                               pattern="[0-9]{6,10}" minlength="6" maxlength="10" required>
                     </div>
-                <?php endif; ?>
+                    <small class="hint">Use digits only. This will be your login phone.</small>
+                </div>
 
-                <!-- CHANGED FORM ACTION TO EMPTY STRING -->
-                <form method="POST" class="auth-form" action="">
-                    <div class="form-group">
-                        <label for="name">
-                            <i class="fas fa-user"></i> Full Name
-                        </label>
-                        <input type="text" id="name" name="name" 
-                               placeholder="Enter your full name" 
-                               value="<?php echo isset($old_data['name']) ? htmlspecialchars($old_data['name']) : ''; ?>" 
-                               required>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock"></i>
+                        <input class="form-control" type="password" id="password" name="password"
+                               placeholder="Create password (min 6 chars)" required>
+                        <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="phone">
-                            <i class="fas fa-phone"></i> Phone Number
-                        </label>
-                        <input type="tel" id="phone" name="phone" 
-                               placeholder="Enter your phone number" 
-                               value="<?php echo isset($old_data['phone']) ? htmlspecialchars($old_data['phone']) : ''; ?>" 
-                               pattern="[0-9]{6,10}"
-                               minlength="6"
-                               maxlength="10"
-                               required>
-                        <small class="hint">We'll use this for login and notifications</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">
-                            <i class="fas fa-lock"></i> Password
-                        </label>
-                        <div class="password-input">
-                            <input type="password" id="password" name="password" 
-                                   placeholder="Create a strong password" required>
-                            <button type="button" class="toggle-password">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                        <small class="hint">At least 6 characters with letters and numbers</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="confirm_password">
-                            <i class="fas fa-lock"></i> Confirm Password
-                        </label>
-                        <input type="password" id="confirm_password" name="confirm_password" 
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock"></i>
+                        <input class="form-control" type="password" id="confirm_password" name="confirm_password"
                                placeholder="Re-enter your password" required>
                     </div>
-
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-user-tag"></i> Account Type
-                        </label>
-                        <input type="text" value="Customer" readonly>
-                        <input type="hidden" name="user_type" value="Customer">
-                    </div>
-
-                    <div class="form-group terms">
-                        <input type="checkbox" id="terms" name="terms" required>
-                        <label for="terms">
-                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-                        </label>
-                    </div>
-
-                    <button type="submit" name="submit" class="btn-auth">
-                        <i class="fas fa-user-plus"></i> Create Account
-                    </button>
-
-                    <div class="auth-footer">
-                        <p>Already have an account? <a href="login.php">Login here</a></p>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Right side: Image -->
-            <div class="auth-image">
-                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Delicious Food">
-                <div class="image-overlay">
-                    <h3>Join Thousands of Happy Customers</h3>
-                    <p>Get exclusive offers and fast delivery</p>
                 </div>
+
+                <div class="form-group">
+                    <label>Account Type</label>
+                    <input class="plain-input" type="text" value="Customer" readonly>
+                    <input type="hidden" name="user_type" value="Customer">
+                </div>
+
+                <div class="terms">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</label>
+                </div>
+
+                <button type="submit" name="submit" class="btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Create Account</span>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Already registered? <a href="login.php">Login here</a>
             </div>
-        </div>
+        </main>
     </div>
 
     <script>
-        // Toggle password visibility
         document.querySelectorAll('.toggle-password').forEach(button => {
             button.addEventListener('click', function() {
                 const input = this.previousElementSibling;
                 const icon = this.querySelector('i');
-                
                 if (input.type === 'password') {
                     input.type = 'text';
                     icon.className = 'fas fa-eye-slash';
@@ -236,7 +394,6 @@ if (isset($_POST['submit'])) {
             });
         });
 
-        // Password strength indicator
         const passwordInput = document.getElementById('password');
         const confirmInput = document.getElementById('confirm_password');
         
@@ -253,7 +410,6 @@ if (isset($_POST['submit'])) {
         passwordInput.addEventListener('input', checkPasswordMatch);
         confirmInput.addEventListener('input', checkPasswordMatch);
         
-        // Form validation before submit
         document.querySelector('form').addEventListener('submit', function(e) {
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm_password').value;

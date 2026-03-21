@@ -96,230 +96,316 @@ if(isset($_POST['submit'])){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Kaah Fast Food</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/auth.css">
+    <title>Login | Kaah Fast Food</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Add this CSS to match the sign-up layout */
-        .auth-card {
-            display: flex;
-            flex-direction: row;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 1000px;
-            width: 100%;
-            min-height: 600px;
+        :root {
+            --bg: #fff7f2;
+            --surface: #ffffff;
+            --text: #1f1f29;
+            --muted: #6b6b80;
+            --primary: #ff5a1f;
+            --primary-dark: #dd4712;
+            --line: #ece8e3;
+            --danger-bg: #ffe8e8;
+            --danger-text: #a22929;
         }
-        
-        .auth-content {
-            flex: 1;
-            padding: 40px;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(160deg, #fff7f2 0%, #fff 45%, #fff 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+        .auth-shell {
+            width: min(1040px, 100%);
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: 0 20px 48px rgba(30, 30, 42, 0.12);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .auth-side {
+            padding: 34px;
+            background: linear-gradient(145deg, #ff5a1f 0%, #ff7d37 100%);
+            color: #fff;
             display: flex;
             flex-direction: column;
-            min-width: 350px;
+            justify-content: space-between;
+            min-height: 640px;
         }
-        
-        .auth-image {
-            flex: 1;
-            position: relative;
-            min-width: 300px;
-        }
-        
-        .auth-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .auth-header {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .logo {
+        .brand {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.1rem;
         }
-        
-        .logo i {
-            font-size: 32px;
-            color: #d4a574;
+        .side-copy h2 {
+            font-size: clamp(1.7rem, 2.6vw, 2.3rem);
+            line-height: 1.15;
+            margin-bottom: 12px;
         }
-        
-        .logo h1 {
-            font-size: 28px;
-            color: #d4a574;
-            margin: 0;
+        .side-copy p { opacity: 0.95; max-width: 420px; }
+        .side-points {
+            list-style: none;
+            margin-top: 18px;
         }
-        
-        .auth-header h2 {
-            font-size: 32px;
-            color: #333;
-            margin: 10px 0 5px 0;
+        .side-points li {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
-        
-        .auth-header p {
-            color: #666;
-            font-size: 16px;
-            margin: 0;
+        .side-points i { opacity: 0.95; }
+        .location-chip {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.35);
+            padding: 8px 12px;
+            border-radius: 999px;
+            width: fit-content;
+            font-size: .9rem;
         }
-        
-        .back-home {
+        .auth-main {
+            padding: 34px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .go-back {
+            text-decoration: none;
+            color: var(--muted);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 9px 12px;
+            font-weight: 600;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .go-back:hover { color: var(--text); border-color: #dad4cd; }
+        .auth-main h1 {
+            font-size: clamp(1.45rem, 2.2vw, 1.9rem);
+            margin-bottom: 6px;
+        }
+        .subtitle { color: var(--muted); margin-bottom: 22px; }
+        .error-alert {
+            background: var(--danger-bg);
+            color: var(--danger-text);
+            border: 1px solid #ffcaca;
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            font-size: .93rem;
+        }
+        .error-alert ul { margin-left: 16px; }
+        .form-group { margin-bottom: 14px; }
+        label {
+            display: block;
+            font-size: .9rem;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .input-wrap i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9a9aac;
+        }
+        .form-control {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px 44px 12px 38px;
+            font-size: .96rem;
+            color: var(--text);
+            background: #fff;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #ffb899;
+            box-shadow: 0 0 0 3px #fff0e8;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #8d8da2;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+        }
+        .row-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0 16px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .remember {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #666;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+        .remember input { accent-color: var(--primary); }
+        .forgot {
+            color: var(--primary-dark);
             text-decoration: none;
-            font-size: 14px;
-            margin-bottom: 20px;
-            transition: color 0.3s;
+            font-weight: 600;
+            font-size: .9rem;
         }
-        
-        .back-home:hover {
-            color: #d4a574;
+        .btn-primary {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff;
+            padding: 12px 16px;
+            font-weight: 800;
+            font-size: .97rem;
+            display: inline-flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: .2s ease;
         }
-        
-        .image-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-            padding: 40px;
-            color: white;
+        .btn-primary:hover { background: var(--primary-dark); }
+        .auth-footer {
+            margin-top: 16px;
+            color: var(--muted);
+            text-align: center;
+            font-size: .94rem;
         }
-        
-        .image-overlay h3 {
-            font-size: 24px;
-            margin: 0 0 10px 0;
+        .auth-footer a { color: var(--primary-dark); font-weight: 700; text-decoration: none; }
+
+        @media (max-width: 900px) {
+            .auth-shell { grid-template-columns: 1fr; }
+            .auth-side { min-height: 300px; padding: 26px; }
+            .auth-main { padding: 26px; }
         }
-        
-        .image-overlay p {
-            font-size: 16px;
-            margin: 0;
-            opacity: 0.9;
-        }
-        
-        @media (max-width: 768px) {
-            .auth-card {
-                flex-direction: column;
-                min-height: auto;
-            }
-            
-            .auth-content, .auth-image {
-                min-width: 100%;
-            }
-            
-            .auth-image {
-                height: 250px;
-                order: -1;
-            }
-            
-            .auth-header, .auth-form {
-                padding: 20px;
-            }
+        @media (max-width: 560px) {
+            body { padding: 12px; }
+            .auth-main, .auth-side { padding: 20px; }
+            .row-between { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <!-- Left side: Form content -->
-            <div class="auth-content">
-                <!-- Header at the top -->
-                <div class="auth-header">
-                    <a href="../index.html" class="back-home">
-                        <i class="fas fa-arrow-left"></i> Back to Home
-                    </a>
-                    <div class="logo">
-                        <i class="fas fa-utensils"></i>
-                        <h1>Kaah Fast Food</h1>
-                    </div>
-                    <h2>Welcome Back!</h2>
-                    <p>Login to your account to continue</p>
-                </div>
+    <div class="auth-shell">
+        <aside class="auth-side">
+            <div class="brand">
+                <i class="fas fa-utensils"></i>
+                <span>Kaah Fast Food</span>
+            </div>
+            <div class="side-copy">
+                <h2>Welcome back to your fast and easy food ordering account.</h2>
+                <p>Login to continue ordering, tracking deliveries, and managing your profile with Kaah Fast Food.</p>
+                <ul class="side-points">
+                    <li><i class="fas fa-check-circle"></i><span>Secure account access</span></li>
+                    <li><i class="fas fa-check-circle"></i><span>Quick order tracking</span></li>
+                    <li><i class="fas fa-check-circle"></i><span>Fast checkout experience</span></li>
+                </ul>
+            </div>
+            <div class="location-chip">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>New Hargeisa</span>
+            </div>
+        </aside>
 
-                <!-- Display Errors -->
-                <?php if(!empty($errors)): ?>
-                    <div class="error-alert">
-                        <ul>
-                            <?php foreach($errors as $error): ?>
-                                <li><?php echo htmlspecialchars($error); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Login Form -->
-                <form action="login.php" method="POST" class="auth-form">
-                    <div class="form-group">
-                        <label for="phone">
-                            <i class="fas fa-phone"></i> Phone Number
-                        </label>
-                        <input type="tel" id="phone" name="phone" 
-                               placeholder="Enter your phone number" 
-                               value="<?php echo htmlspecialchars($old_phone); ?>" 
-                               pattern="[0-9]{6,10}"
-                               minlength="6"
-                               maxlength="10"
-                               required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">
-                            <i class="fas fa-lock"></i> Password
-                        </label>
-                        <div class="password-input">
-                            <input type="password" id="password" name="password" 
-                                   placeholder="Enter your password" required>
-                            <button type="button" class="toggle-password">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-group remember-forgot">
-                        <div class="remember">
-                            <input type="checkbox" id="remember" name="remember">
-                            <label for="remember">Remember me</label>
-                        </div>
-                        <a href="forgot_password.php" class="forgot">Forgot Password?</a>
-                    </div>
-
-                    <button type="submit" name="submit" class="btn-auth">
-                        <i class="fas fa-sign-in-alt"></i> Login
-                    </button>
-
-                    <div class="auth-footer">
-                        <p>Don't have an account? <a href="signup.php">Sign up here</a></p>
-                    </div>
-                </form>
+        <main class="auth-main">
+            <div class="top-actions">
+                <a href="../index.php" class="go-back">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </a>
             </div>
 
-            <!-- Right side: Image -->
-            <div class="auth-image">
-                <img src="https://images.unsplash.com/photo-1565299507177-b0ac66763828?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Food Delivery">
-                <div class="image-overlay">
-                    <h3>Fast Food Delivery</h3>
-                    <p>Login to track your orders and get recommendations</p>
+            <h1>Login to your account</h1>
+            <p class="subtitle">Use your registered phone number and password.</p>
+
+            <?php if(!empty($errors)): ?>
+                <div class="error-alert">
+                    <ul>
+                        <?php foreach($errors as $error): ?>
+                            <li><?php echo htmlspecialchars($error); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
                 </div>
+            <?php endif; ?>
+
+            <form action="login.php" method="POST">
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-phone"></i>
+                        <input class="form-control" type="tel" id="phone" name="phone"
+                               placeholder="Enter phone (6-10 digits)"
+                               value="<?php echo htmlspecialchars($old_phone); ?>"
+                               pattern="[0-9]{6,10}" minlength="6" maxlength="10" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock"></i>
+                        <input class="form-control" type="password" id="password" name="password"
+                               placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row-between">
+                    <label class="remember" for="remember">
+                        <input type="checkbox" id="remember" name="remember">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="forgot_password.php" class="forgot">Forgot password?</a>
+                </div>
+
+                <button type="submit" name="submit" class="btn-primary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                No account yet? <a href="signup.php">Create one</a>
             </div>
-        </div>
+        </main>
     </div>
 
     <script>
-        // Toggle password visibility
         document.querySelectorAll('.toggle-password').forEach(button => {
             button.addEventListener('click', function() {
                 const input = this.previousElementSibling;
                 const icon = this.querySelector('i');
-                
                 if (input.type === 'password') {
                     input.type = 'text';
                     icon.className = 'fas fa-eye-slash';
@@ -328,24 +414,6 @@ if(isset($_POST['submit'])){
                     icon.className = 'fas fa-eye';
                 }
             });
-        });
-        
-        // Form validation
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const phone = document.getElementById('phone').value;
-            const password = document.getElementById('password').value;
-            
-            if(!phone) {
-                e.preventDefault();
-                alert('Please enter your phone number');
-                return false;
-            }
-            
-            if(!password) {
-                e.preventDefault();
-                alert('Please enter your password');
-                return false;
-            }
         });
     </script>
 </body>
