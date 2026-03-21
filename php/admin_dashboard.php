@@ -1226,7 +1226,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                     <div class="form-group">
                         <label>Image URL or data</label>
                         <textarea name="image_url" class="form-control" rows="3" placeholder="https://example.com/image.jpg — or paste data:image/jpeg;base64,... (long)"></textarea>
-                        <small class="text-muted">Use a normal link when possible. Base64 data URIs work after the database column is <code>MEDIUMTEXT</code> (run <code>php/migrate_menu_image_url.php</code> once if you still see “Data too long”).</small>
+                        <small class="text-muted">Prefer an image link. For pasted base64, run <code>migrate_menu_image_url.php</code> once if MySQL reports “Data too long”.</small>
                     </div>
                     <div class="form-group">
                         <div class="form-checkbox">
