@@ -9,6 +9,8 @@ $user_name = $_SESSION['name'];
 $message = '';
 $error = '';
 
+kaah_prg_flash_apply($message, $error);
+
 // Handle status update
 if (isset($_POST['update_delivery_status'])) {
     $delivery_id = intval($_POST['delivery_id']);
@@ -33,7 +35,7 @@ if (isset($_POST['update_delivery_status'])) {
                 $order_sql = "UPDATE orders SET status = 'On the way' WHERE order_id = $order_id";
                 mysqli_query($connection, $order_sql);
             }
-            $message = 'Status updated successfully!';
+            kaah_prg_redirect('delivery_dashboard.php', 'Status updated successfully!');
         } else {
             $error = 'Error: ' . mysqli_error($connection);
         }
@@ -56,7 +58,7 @@ if (isset($_POST['complete_delivery'])) {
         $payment_sql = "UPDATE orders SET payment_status = 'Paid' WHERE order_id = $order_id";
         mysqli_query($connection, $payment_sql);
         
-        $message = "Delivery marked as completed!";
+        kaah_prg_redirect('delivery_dashboard.php', 'Delivery marked as completed!');
     } else {
         $error = "Error: " . mysqli_error($connection);
     }

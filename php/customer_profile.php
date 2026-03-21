@@ -5,6 +5,15 @@ require_authenticated_session(['Customer'], 'html');
 $user_id = intval($_SESSION['user_id']);
 $success = '';
 $error = '';
+$__fm = '';
+$__fe = '';
+kaah_prg_flash_apply($__fm, $__fe);
+if ($__fm !== '') {
+    $success = $__fm;
+}
+if ($__fe !== '') {
+    $error = $__fe;
+}
 
 function get_user($connection, $user_id) {
     $res = mysqli_query($connection, "SELECT * FROM user WHERE user_id = $user_id");
@@ -31,8 +40,7 @@ if (isset($_POST['update_profile'])) {
             if (mysqli_query($connection, $upd_sql)) {
                 $_SESSION['name'] = $name;
                 $_SESSION['phone'] = $phone;
-                $success = 'Profile updated successfully';
-                $user = get_user($connection, $user_id);
+                kaah_prg_redirect('customer_profile.php', 'Profile updated successfully');
             } else {
                 $error = 'Failed to update profile';
             }
@@ -60,7 +68,7 @@ if (isset($_POST['change_password'])) {
         $hashed = password_hash($new_password, PASSWORD_DEFAULT);
         $upd_sql = "UPDATE user SET password = '$hashed' WHERE user_id = $user_id";
         if (mysqli_query($connection, $upd_sql)) {
-            $success = 'Password changed successfully';
+            kaah_prg_redirect('customer_profile.php', 'Password changed successfully');
         } else {
             $error = 'Failed to change password';
         }

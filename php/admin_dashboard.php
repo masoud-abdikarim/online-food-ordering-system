@@ -12,6 +12,9 @@ $user_type = isset($_SESSION['user_type']) ? $_SESSION['user_type'] : 'Admin';
 $message = '';
 $error = '';
 
+// Post/Redirect/Get: show success after redirect (avoids resubmit on refresh)
+kaah_prg_flash_apply($message, $error);
+
 // Post-redirect messages (workflow)
 if (isset($_GET['msg']) && $_GET['msg'] === 'approved') {
     $message = 'Order approved. Open <strong>Dispatch</strong> — the order is waiting for a driver assignment.';
@@ -68,7 +71,7 @@ if (isset($_POST['create_user'])) {
                 VALUES ('$name', '$phone', '$hashed_password', '$user_type', $is_active)";
         
         if(mysqli_query($connection, $sql)){
-            $message = ucfirst($user_type) . " account created successfully!";
+            kaah_prg_redirect('admin_dashboard.php', ucfirst($user_type) . " account created successfully!");
         } else {
             $error = "Error creating user: " . mysqli_error($connection);
         }
@@ -107,7 +110,7 @@ if (isset($_POST['update_user'])) {
                 WHERE user_id = $user_id_update";
         
         if (mysqli_query($connection, $sql)) {
-            $message = "User updated successfully!";
+            kaah_prg_redirect('admin_dashboard.php', 'User updated successfully!');
         } else {
             $error = "Error updating user: " . mysqli_error($connection);
         }
@@ -125,12 +128,12 @@ if (isset($_POST['delete_user'])) {
         $sql = "DELETE FROM user WHERE user_id = $delete_id";
         
         if (mysqli_query($connection, $sql)) {
-            $message = "User deleted successfully!";
+            kaah_prg_redirect('admin_dashboard.php', 'User deleted successfully!');
         } else {
             // If delete fails (due to foreign key constraints), deactivate instead
             $sql = "UPDATE user SET is_active = 0 WHERE user_id = $delete_id";
             if (mysqli_query($connection, $sql)) {
-                $message = "User deactivated successfully!";
+                kaah_prg_redirect('admin_dashboard.php', 'User deactivated successfully!');
             } else {
                 $error = "Error: " . mysqli_error($connection);
             }
@@ -144,7 +147,7 @@ if (isset($_POST['activate_user'])) {
     $sql = "UPDATE user SET is_active = 1 WHERE user_id = $activate_id";
     
     if (mysqli_query($connection, $sql)) {
-        $message = "User activated successfully!";
+        kaah_prg_redirect('admin_dashboard.php', 'User activated successfully!');
     } else {
         $error = "Error: " . mysqli_error($connection);
     }
@@ -166,7 +169,7 @@ if (isset($_POST['add_menu_item'])) {
                 VALUES ('$name', '$description', $price, '$image_url', '$category')";
         
         if (mysqli_query($connection, $sql)) {
-            $message = "Menu item added successfully!";
+            kaah_prg_redirect('admin_dashboard.php', 'Menu item added successfully!');
         } else {
             $error = "Error: " . mysqli_error($connection);
         }
@@ -197,7 +200,7 @@ if (isset($_POST['update_menu_item'])) {
                 WHERE item_id = $item_id";
         
         if (mysqli_query($connection, $sql)) {
-            $message = "Menu item updated successfully!";
+            kaah_prg_redirect('admin_dashboard.php', 'Menu item updated successfully!');
         } else {
             $error = "Error: " . mysqli_error($connection);
         }
@@ -210,7 +213,7 @@ if (isset($_POST['delete_menu_item'])) {
     $sql = "UPDATE menuitem SET is_available = FALSE WHERE item_id = $item_id";
     
     if (mysqli_query($connection, $sql)) {
-        $message = "Menu item removed successfully!";
+        kaah_prg_redirect('admin_dashboard.php', 'Menu item removed successfully!');
     } else {
         $error = "Error: " . mysqli_error($connection);
     }
@@ -267,7 +270,7 @@ if (isset($_POST['admin_update_order_status'])) {
                 mysqli_query($connection, "DELETE FROM delivery WHERE order_id = $order_id");
             }
             mysqli_commit($connection);
-            $message = 'Order status updated.';
+            kaah_prg_redirect('admin_dashboard.php', 'Order status updated.');
         }
     }
 }
@@ -299,7 +302,7 @@ if (isset($_POST['assign_delivery'])) {
                         VALUES ($order_id, $delivery_person_id, 'Assigned')";
                 if (mysqli_query($connection, $sql)) {
                     mysqli_query($connection, "UPDATE orders SET status = 'Assigned' WHERE order_id = $order_id");
-                    $message = 'Delivery assigned — order is now with the driver.';
+                    kaah_prg_redirect('admin_dashboard.php', 'Delivery assigned — order is now with the driver.');
                 } else {
                     $error = 'Error: ' . mysqli_error($connection);
                 }
@@ -337,7 +340,7 @@ if (isset($_POST['reassign_delivery'])) {
                 $sql = "UPDATE delivery SET delivery_person_id = $delivery_person_id, status = 'Assigned', 
                         assigned_at = NOW(), delivered_at = NULL WHERE delivery_id = $did";
                 if (mysqli_query($connection, $sql)) {
-                    $message = 'Delivery reassigned.';
+                    kaah_prg_redirect('admin_dashboard.php', 'Delivery reassigned.');
                 } else {
                     $error = mysqli_error($connection);
                 }
