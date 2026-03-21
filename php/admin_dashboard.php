@@ -419,6 +419,18 @@ $history_older_sql = "SELECT o.*, u.name as customer_name, u2.name as delivery_p
                       AND o.status IN ('Preparing','On the way','Delivered') 
                       ORDER BY o.order_date DESC";
 $history_older_result = mysqli_query($connection, $history_older_sql);
+
+// Root-relative CSS URL (fixes broken ../css when SCRIPT_NAME / URL path varies)
+$__sn = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
+if ($__sn === '' || $__sn[0] !== '/') {
+    $__sn = '/' . ltrim($__sn, '/');
+}
+$__app_root = str_replace('\\', '/', dirname(dirname($__sn)));
+if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
+    $admin_css_href = '/css/admin_dashboard.css';
+} else {
+    $admin_css_href = rtrim($__app_root, '/') . '/css/admin_dashboard.css';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -427,729 +439,83 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Kaah Fast Food</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --danger-color: #e74c3c;
-            --warning-color: #f39c12;
-            --light-bg: #f8f9fa;
-            --dark-text: #2c3e50;
-            --light-text: #7f8c8d;
-            --sidebar-width: 280px;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light-bg);
-            color: var(--dark-text);
-            line-height: 1.6;
-        }
-        
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        /* Fixed Sidebar */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--primary-color);
-            color: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            overflow-y: auto;
-            z-index: 100;
-            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
-        }
-        
-        .sidebar-header {
-            padding: 25px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .sidebar-header h2 {
-            color: white;
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .user-role {
-            color: #bdc3c7;
-            font-size: 0.9rem;
-        }
-        
-        .user-info {
-            padding: 25px 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 2rem;
-        }
-        
-        .user-info h3 {
-            margin-bottom: 5px;
-            font-size: 1.2rem;
-        }
-        
-        .user-info p {
-            color: #bdc3c7;
-            font-size: 0.9rem;
-        }
-        
-        .sidebar-nav ul {
-            list-style: none;
-            padding: 20px 0;
-        }
-        
-        .sidebar-nav li {
-            margin-bottom: 5px;
-        }
-        
-        .sidebar-nav a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px 25px;
-            color: #bdc3c7;
-            text-decoration: none;
-            transition: all 0.3s;
-            border-left: 4px solid transparent;
-        }
-        
-        .sidebar-nav a:hover {
-            background: rgba(255,255,255,0.05);
-            color: white;
-        }
-        
-        .sidebar-nav li.active a {
-            background: rgba(52, 152, 219, 0.1);
-            color: white;
-            border-left-color: var(--secondary-color);
-        }
-        
-        .sidebar-nav i {
-            width: 20px;
-            text-align: center;
-        }
-        
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 30px;
-            min-height: 100vh;
-        }
-        
-        .dashboard-header {
-            background: white;
-            padding: 25px 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header-left h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
-        
-        .header-left p {
-            color: var(--light-text);
-        }
-        
-        .current-date {
-            background: var(--light-bg);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-        
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-        }
-        
-        .stat-info h3 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
-        
-        .stat-info p {
-            color: var(--light-text);
-            font-size: 0.95rem;
-        }
-        
-        /* Sections */
-        .section {
-            background: white;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        
-        .section-header {
-            padding: 25px 30px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .section-header h2 {
-            font-size: 1.5rem;
-            color: var(--primary-color);
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-        }
-        
-        .btn-primary {
-            background: var(--secondary-color);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-        }
-        
-        .btn-success {
-            background: var(--success-color);
-            color: white;
-        }
-        
-        .btn-danger {
-            background: var(--danger-color);
-            color: white;
-        }
-        
-        .btn-warning {
-            background: var(--warning-color);
-            color: white;
-        }
-        
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-        }
-        
-        /* Tables */
-        .table-responsive {
-            overflow-x: auto;
-            padding: 0 30px 25px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-        
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: var(--primary-color);
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-        
-        tr:hover {
-            background: #f8f9fa;
-        }
-        
-        /* Status Badges */
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-        
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .status-preparing {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-        
-        .status-ontheway {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-delivered {
-            background: #c3e6cb;
-            color: #155724;
-        }
-        
-        .status-cancelled {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        /* User Management */
-        .user-type-badge {
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-        
-        .badge-admin {
-            background: #9C27B0;
-            color: white;
-        }
-        
-        .badge-delivery {
-            background: #2196F3;
-            color: white;
-        }
-        
-        .badge-customer {
-            background: #FF9800;
-            color: white;
-        }
-        
-        /* Menu Grid */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-            padding: 30px;
-        }
-        
-        .menu-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .menu-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        
-        .menu-card-image {
-            height: 200px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .menu-card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .menu-card-content {
-            padding: 20px;
-        }
-        
-        .menu-card-content h3 {
-            margin-bottom: 10px;
-            color: var(--primary-color);
-            font-size: 1.2rem;
-        }
-        
-        .menu-card-content p {
-            color: var(--light-text);
-            font-size: 0.95rem;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-        
-        .menu-card-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .price {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--success-color);
-        }
-        
-        /* Action Buttons */
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        
-        /* Modals */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: modalSlideIn 0.3s ease;
-        }
-        
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .modal-header {
-            padding: 25px 30px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-header h2 {
-            font-size: 1.5rem;
-            color: var(--primary-color);
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--light-text);
-        }
-        
-        .modal-body {
-            padding: 30px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--dark-text);
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-        }
-        
-        .form-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .form-checkbox input {
-            width: auto;
-        }
-        
-        /* Alerts */
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        /* Delete Confirmation */
-        .delete-confirmation {
-            text-align: center;
-            padding: 40px 30px;
-        }
-        
-        .delete-confirmation i {
-            font-size: 4rem;
-            color: var(--danger-color);
-            margin-bottom: 20px;
-        }
-        
-        .delete-confirmation h3 {
-            margin-bottom: 15px;
-            color: var(--primary-color);
-        }
-        
-        .delete-confirmation p {
-            color: var(--light-text);
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-        
-        .delete-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-        
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s;
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .menu-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .dashboard-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .section-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .mobile-menu-toggle {
-                display: block;
-                position: fixed;
-                top: 20px;
-                left: 20px;
-                z-index: 99;
-                background: var(--primary-color);
-                color: white;
-                width: 50px;
-                height: 50px;
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-                cursor: pointer;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            }
-        }
-        
-        /* Mobile Menu Toggle (hidden on desktop) */
-        .mobile-menu-toggle {
-            display: none;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($admin_css_href, ENT_QUOTES, 'UTF-8'); ?>">
 </head>
-<body>
-    <!-- Mobile Menu Toggle -->
-    <div class="mobile-menu-toggle" onclick="toggleSidebar()">
-        <i class="fas fa-bars"></i>
-    </div>
-    
-    <!-- Fixed Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2><i class="fas fa-utensils"></i> Kaah Fast Food</h2>
-            <span class="user-role">Admin Dashboard</span>
+<body class="kaah-admin">
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+    <button type="button" class="mobile-menu-toggle" onclick="toggleSidebar()" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+    <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar" aria-label="Collapse sidebar"><i class="fas fa-angles-left"></i></button>
+
+    <aside class="sidebar" id="appSidebar">
+        <div class="kaah-brand">
+            <div class="kaah-brand__logo"><i class="fas fa-utensils"></i></div>
+            <div class="kaah-brand__text">
+                <strong>Kaah Fast Food</strong>
+                <span><i class="fas fa-location-dot"></i> New Hargeisa</span>
+            </div>
         </div>
-        
+        <div class="sidebar-header">
+            <h2>Navigation</h2>
+        </div>
+
         <div class="user-info">
             <div class="user-avatar">
                 <i class="fas fa-user-shield"></i>
             </div>
-            <h3><?php echo htmlspecialchars($user_name); ?></h3>
-            <p>Administrator</p>
+            <div>
+                <h3><?php echo htmlspecialchars($user_name); ?></h3>
+                <p>Administrator</p>
+            </div>
         </div>
-        
+
         <nav class="sidebar-nav">
             <ul>
                 <li class="active">
-                    <a href="admin_dashboard.php">
-                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    <a href="#menu-display" onclick="showSection('menu-display'); return false;">
+                        <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#menu-management" onclick="showSection('menu-management')">
-                        <i class="fas fa-utensils"></i> Menu Management
+                    <a href="#menu-management" onclick="showSection('menu-management'); return false;">
+                        <i class="fas fa-utensils"></i><span>Menu</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#user-management" onclick="showSection('user-management')">
-                        <i class="fas fa-users"></i> User Management
+                    <a href="#user-management" onclick="showSection('user-management'); return false;">
+                        <i class="fas fa-users"></i><span>Users</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#order-approval" onclick="showSection('order-approval')">
-                        <i class="fas fa-check-circle"></i> Order Approval
+                    <a href="#order-approval" onclick="showSection('order-approval'); return false;">
+                        <i class="fas fa-check-circle"></i><span>Approvals</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#orders-list" onclick="showSection('orders-list')">
-                        <i class="fas fa-receipt"></i> All Orders
+                    <a href="#orders-list" onclick="showSection('orders-list'); return false;">
+                        <i class="fas fa-receipt"></i><span>All Orders</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#delivery-assignment" onclick="showSection('delivery-assignment')">
-                        <i class="fas fa-motorcycle"></i> Delivery Assignment
+                    <a href="#delivery-assignment" onclick="showSection('delivery-assignment'); return false;">
+                        <i class="fas fa-motorcycle"></i><span>Dispatch</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#order-history" onclick="showSection('order-history')">
-                        <i class="fas fa-history"></i> Order History
+                    <a href="#order-history" onclick="showSection('order-history'); return false;">
+                        <i class="fas fa-history"></i><span>History</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#assigned-deliveries" onclick="showSection('assigned-deliveries')">
-                        <i class="fas fa-truck"></i> Assigned Deliveries
+                    <a href="#assigned-deliveries" onclick="showSection('assigned-deliveries'); return false;">
+                        <i class="fas fa-truck"></i><span>Live deliveries</span>
                     </a>
                 </li>
                 <li>
                     <a href="logout.php">
-                        <i class="fas fa-sign-out-alt"></i> Logout
+                        <i class="fas fa-sign-out-alt"></i><span>Logout</span>
                     </a>
                 </li>
             </ul>
@@ -1158,14 +524,19 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Header -->
+        <!-- Top bar -->
         <header class="dashboard-header">
             <div class="header-left">
-                <h1>Admin Dashboard</h1>
-                <p>System Overview & Statistics</p>
+                <h1>Operations console</h1>
+                <p>Kaah Fast Food · <strong>New Hargeisa</strong> — orders, menu, users &amp; delivery</p>
             </div>
             <div class="header-right">
+                <span class="kaah-pill"><i class="fas fa-shield-halved"></i> Admin</span>
                 <span class="current-date"><?php echo date('F d, Y'); ?></span>
+                <div class="kaah-top-links">
+                    <a href="admin_profile.php"><i class="fas fa-user-gear"></i> Profile</a>
+                    <a href="../index.php" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> Site</a>
+                </div>
             </div>
         </header>
 
@@ -1243,6 +614,16 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
                 <div class="stat-info">
                     <h3><?php echo $stats['total_delivery']; ?></h3>
                     <p>Delivery Personnel</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fff4e6;">
+                    <i class="fas fa-bowl-food" style="color: #ea580c;"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><?php echo (int)($stats['menu_items'] ?? 0); ?></h3>
+                    <p>Active menu items</p>
                 </div>
             </div>
         </div>
@@ -2068,36 +1449,44 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
     </div>
 
     <script>
-        // Toggle sidebar on mobile
+        // Mobile drawer: body.sidebar-open + overlay (see admin_dashboard.css)
         function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('active');
+            document.body.classList.toggle('sidebar-open');
         }
-        
+
+        document.getElementById('sidebarOverlay')?.addEventListener('click', function () {
+            document.body.classList.remove('sidebar-open');
+        });
+
+        document.getElementById('sidebarCollapseBtn')?.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.body.classList.toggle('sidebar-collapsed');
+        });
+
         // Show/hide sections
         function showSection(sectionId) {
-            // Hide all sections
             document.querySelectorAll('.section').forEach(section => {
                 section.style.display = 'none';
+                section.classList.remove('active-section');
             });
-            
-            // Show selected section
+
             const section = document.getElementById(sectionId);
             if (section) {
                 section.style.display = 'block';
+                section.classList.add('active-section');
             }
-            
-            // Update active nav
+
             document.querySelectorAll('.sidebar-nav li').forEach(item => {
                 item.classList.remove('active');
             });
-            
-            // Update active state in sidebar
-            const navItems = document.querySelectorAll('.sidebar-nav a');
-            navItems.forEach(item => {
+
+            document.querySelectorAll('.sidebar-nav a').forEach(item => {
                 if (item.getAttribute('href') === '#' + sectionId) {
                     item.parentElement.classList.add('active');
                 }
             });
+
+            document.body.classList.remove('sidebar-open');
         }
         
         // Modal functions
@@ -2190,31 +1579,37 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
                 form.method = 'POST';
                 form.innerHTML = `
                     <input type="hidden" name="activate_id" value="${userId}">
+                    <input type="hidden" name="activate_user" value="1">
                 `;
                 document.body.appendChild(form);
                 form.submit();
             }
         }
         
-    function submitDeactivate() {
-    if (userToDeactivate) {
-        if (confirm('Are you sure you want to deactivate this user?')) {
-            // Use the delete_user endpoint which will deactivate if deletion fails
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.style.display = 'none';
-            
-            const userIdInput = document.createElement('input');
-            userIdInput.type = 'hidden';
-            userIdInput.name = 'delete_id';
-            userIdInput.value = userToDeactivate;
-            form.appendChild(userIdInput);
-            
-            document.body.appendChild(form);
-            form.submit();
+        function submitDeactivate() {
+            if (userToDeactivate) {
+                if (confirm('Are you sure you want to deactivate this user?')) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.style.display = 'none';
+
+                    const userIdInput = document.createElement('input');
+                    userIdInput.type = 'hidden';
+                    userIdInput.name = 'delete_id';
+                    userIdInput.value = userToDeactivate;
+                    form.appendChild(userIdInput);
+
+                    const flag = document.createElement('input');
+                    flag.type = 'hidden';
+                    flag.name = 'delete_user';
+                    flag.value = '1';
+                    form.appendChild(flag);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
         }
-    }
-}
         
         // Close modals on outside click
         window.onclick = function(event) {
