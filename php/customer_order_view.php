@@ -153,7 +153,7 @@ $delivery = mysqli_num_rows($delivery_result) > 0 ? mysqli_fetch_assoc($delivery
                         <i class="fas fa-motorcycle"></i>
                     </div>
                     <div class="step-info">
-                        <h4>On the Way</h4>
+                        <h4>On the way</h4>
                         <p>Your order is out for delivery</p>
                     </div>
                 </div>

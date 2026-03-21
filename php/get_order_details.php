@@ -14,7 +14,7 @@ if ($order_id <= 0) {
     die("Invalid order ID");
 }
 
-// Get order details
+// Get order details (only if this delivery person is assigned to the order)
 $sql = "SELECT 
     o.*,
     u.name as customer_name,
@@ -27,11 +27,14 @@ $sql = "SELECT
     d.delivered_at
 FROM orders o
 JOIN user u ON o.user_id = u.user_id
+JOIN delivery d ON d.order_id = o.order_id AND d.delivery_person_id = $user_id
 LEFT JOIN address a ON o.order_id = a.order_id
-LEFT JOIN delivery d ON o.order_id = d.order_id AND d.delivery_person_id = $user_id
 WHERE o.order_id = $order_id";
 
 $result = mysqli_query($connection, $sql);
+if (!$result) {
+    die('Database error loading order');
+}
 $order = mysqli_fetch_assoc($result);
 
 if (!$order) {
@@ -45,10 +48,13 @@ $items_sql = "SELECT
     mi.price as item_price,
     mi.image_url
 FROM orderitem oi
-JOIN menuitem mi ON oi.item_id = mi.item_id
+JOIN menuitem mi ON oi.menu_item_id = mi.item_id
 WHERE oi.order_id = $order_id";
 
 $items_result = mysqli_query($connection, $items_sql);
+if (!$items_result) {
+    die('Error loading order items');
+}
 ?>
 
 <div class="customer-info-card">

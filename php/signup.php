@@ -29,7 +29,7 @@ if (isset($_POST['submit'])) {
             $errors[] = "Phone number is already registered";
         } else {
             $hashed = password_hash($password, PASSWORD_DEFAULT);
-            $insert_sql = "INSERT INTO user (name, phone, password, user_type) VALUES ('$name', '$phone', '$hashed', '$user_type')";
+            $insert_sql = "INSERT INTO user (name, phone, password, user_type, is_active) VALUES ('$name', '$phone', '$hashed', '$user_type', 1)";
             if (mysqli_query($connection, $insert_sql)) {
                 $user_id = mysqli_insert_id($connection);
                 $_SESSION['user_id'] = $user_id;

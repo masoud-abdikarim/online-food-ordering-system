@@ -21,6 +21,12 @@ mysqli_begin_transaction($connection);
 
 try {
     $payment_method = isset($data['payment_method']) ? mysqli_real_escape_string($connection, $data['payment_method']) : '';
+    $address_raw = isset($data['address']) ? trim((string)$data['address']) : '';
+    if (strlen($address_raw) < 5) {
+        throw new Exception('Please enter a complete delivery address (at least 5 characters).');
+    }
+    $address_esc = mysqli_real_escape_string($connection, $address_raw);
+    $city_esc = mysqli_real_escape_string($connection, 'New Hargeisa');
 
     if (!isset($data['items']) || !is_array($data['items']) || count($data['items']) === 0) {
         throw new Exception('No items in order');
@@ -76,16 +82,12 @@ try {
     }
     
     $order_id = mysqli_insert_id($connection);
-    
-    // SKIP ADDRESS INSERTION FOR NOW - FIX TABLE LATER
-    // Address insertion commented out to avoid errors
-    /*
-    if (!empty($address) || !empty($city) || !empty($postal_code)) {
-        $address_sql = "INSERT INTO address (order_id, address, city, postal_code) 
-                        VALUES ($order_id, '$address', '$city', '$postal_code')";
-        mysqli_query($connection, $address_sql);
+
+    $address_sql = "INSERT INTO address (order_id, address, city, postal_code) 
+                    VALUES ($order_id, '$address_esc', '$city_esc', NULL)";
+    if (!mysqli_query($connection, $address_sql)) {
+        throw new Exception('Could not save delivery address: ' . mysqli_error($connection));
     }
-    */
     
     foreach ($validated_items as $vi) {
         $menu_item_id = $vi['id'];

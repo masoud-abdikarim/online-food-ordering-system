@@ -18,30 +18,31 @@ $error = '';
 // Handle status update
 if (isset($_POST['update_delivery_status'])) {
     $delivery_id = intval($_POST['delivery_id']);
-    $status = mysqli_real_escape_string($connection, $_POST['status']);
     $order_id = intval($_POST['order_id']);
-    
-    // Update delivery status
-    $sql = "UPDATE delivery SET status = '$status' WHERE delivery_id = $delivery_id";
-    
-    if (mysqli_query($connection, $sql)) {
-        // Also update order status if delivered
-        if ($status == 'Delivered') {
-            $order_sql = "UPDATE orders SET status = 'Delivered' WHERE order_id = $order_id";
-            mysqli_query($connection, $order_sql);
-            
-            // Mark payment as paid if not already
-            $payment_sql = "UPDATE orders SET payment_status = 'Paid' WHERE order_id = $order_id AND payment_status = 'Pending'";
-            mysqli_query($connection, $payment_sql);
-        } elseif ($status == 'Picked Up') {
-            // Update order status to "On the way" when picked up
-            $order_sql = "UPDATE orders SET status = 'On the way' WHERE order_id = $order_id";
-            mysqli_query($connection, $order_sql);
-        }
-        
-        $message = "Status updated successfully!";
+    $raw_status = isset($_POST['status']) ? (string)$_POST['status'] : '';
+    $allowed_delivery_statuses = ['Assigned', 'Picked Up', 'On the way', 'Delivered'];
+    if (!in_array($raw_status, $allowed_delivery_statuses, true)) {
+        $error = 'Invalid delivery status.';
     } else {
-        $error = "Error: " . mysqli_error($connection);
+        $status = mysqli_real_escape_string($connection, $raw_status);
+        $delivered_sql = ($raw_status === 'Delivered')
+            ? "UPDATE delivery SET status = '$status', delivered_at = NOW() WHERE delivery_id = $delivery_id"
+            : "UPDATE delivery SET status = '$status' WHERE delivery_id = $delivery_id";
+
+        if (mysqli_query($connection, $delivered_sql)) {
+            if ($raw_status === 'Delivered') {
+                $order_sql = "UPDATE orders SET status = 'Delivered' WHERE order_id = $order_id";
+                mysqli_query($connection, $order_sql);
+                $payment_sql = "UPDATE orders SET payment_status = 'Paid' WHERE order_id = $order_id AND payment_status = 'Pending'";
+                mysqli_query($connection, $payment_sql);
+            } elseif ($raw_status === 'Picked Up') {
+                $order_sql = "UPDATE orders SET status = 'On the way' WHERE order_id = $order_id";
+                mysqli_query($connection, $order_sql);
+            }
+            $message = 'Status updated successfully!';
+        } else {
+            $error = 'Error: ' . mysqli_error($connection);
+        }
     }
 }
 
@@ -50,8 +51,7 @@ if (isset($_POST['complete_delivery'])) {
     $delivery_id = intval($_POST['delivery_id']);
     $order_id = intval($_POST['order_id']);
     
-    // Update delivery status to Delivered
-    $sql = "UPDATE delivery SET status = 'Delivered' WHERE delivery_id = $delivery_id";
+    $sql = "UPDATE delivery SET status = 'Delivered', delivered_at = NOW() WHERE delivery_id = $delivery_id";
     
     if (mysqli_query($connection, $sql)) {
         // Update order status
@@ -84,7 +84,7 @@ AND d.status != 'Delivered'
 ORDER BY 
     CASE d.status 
         WHEN 'Picked Up' THEN 1
-        WHEN 'On the Way' THEN 2
+        WHEN 'On the way' THEN 2
         WHEN 'Assigned' THEN 3
         ELSE 4
     END,
@@ -146,7 +146,7 @@ if ($result) {
 // Pending deliveries
 $sql = "SELECT COUNT(*) as pending FROM delivery 
         WHERE delivery_person_id = $user_id 
-        AND status IN ('Assigned', 'Picked Up', 'On the Way')";
+        AND status IN ('Assigned', 'Picked Up', 'On the way')";
 $result = mysqli_query($connection, $sql);
 if ($result) {
     $stats['pending_deliveries'] = mysqli_fetch_assoc($result)['pending'];
@@ -338,7 +338,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                                     $status_class = 'status-assigned';
                                     if ($order['delivery_status'] == 'Picked Up') {
                                         $status_class = 'status-picked';
-                                    } elseif ($order['delivery_status'] == 'On the Way') {
+                                    } elseif ($order['delivery_status'] == 'On the way') {
                                         $status_class = 'status-ontheway';
                                     } elseif ($order['delivery_status'] == 'Delivered') {
                                         $status_class = 'status-delivered';
@@ -376,12 +376,12 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="delivery_id" value="<?php echo $order['delivery_id']; ?>">
                                                 <input type="hidden" name="order_id" value="<?php echo $order['order_id']; ?>">
-                                                <input type="hidden" name="status" value="On the Way">
+                                                <input type="hidden" name="status" value="On the way">
                                                 <button type="submit" name="update_delivery_status" class="btn btn-warning btn-sm">
                                                     <i class="fas fa-truck"></i> Start Delivery
                                                 </button>
                                             </form>
-                                        <?php elseif($order['delivery_status'] == 'On the Way'): ?>
+                                        <?php elseif($order['delivery_status'] == 'On the way'): ?>
                                             <button onclick="showDeliveryCompleteModal(<?php echo $order['delivery_id']; ?>, <?php echo $order['order_id']; ?>)" 
                                                     class="btn btn-success btn-sm">
                                                 <i class="fas fa-check"></i> Complete Delivery

@@ -239,7 +239,7 @@ if (isset($_POST['assign_delivery'])) {
     // Prevent assigning a busy delivery person
     $busy_sql = "SELECT COUNT(*) AS cnt FROM delivery 
                  WHERE delivery_person_id = $delivery_person_id 
-                 AND status IN ('Assigned','Picked Up','On the Way')";
+                 AND status IN ('Assigned','Picked Up','On the way')";
     $busy_res = mysqli_query($connection, $busy_sql);
     $busy_row = $busy_res ? mysqli_fetch_assoc($busy_res) : ['cnt' => 0];
     if (intval($busy_row['cnt']) > 0) {
@@ -358,7 +358,7 @@ $preparing_orders_sql = "SELECT o.*, u.name as customer_name
                          WHERE o.status = 'Preparing' 
                          AND o.order_id NOT IN (
                             SELECT order_id FROM delivery 
-                            WHERE status IN ('Assigned','Picked Up','On the Way')
+                            WHERE status IN ('Assigned','Picked Up','On the way')
                          )
                          ORDER BY o.order_date DESC";
 $preparing_orders_result = mysqli_query($connection, $preparing_orders_sql);
@@ -367,7 +367,7 @@ $preparing_orders_result = mysqli_query($connection, $preparing_orders_sql);
 $delivery_personnel_sql = "SELECT u.*, 
                            (SELECT COUNT(*) FROM delivery d 
                             WHERE d.delivery_person_id = u.user_id 
-                            AND d.status IN ('Assigned','Picked Up','On the Way')) AS active_deliveries 
+                            AND d.status IN ('Assigned','Picked Up','On the way')) AS active_deliveries 
                            FROM user u 
                            WHERE u.user_type = 'Delivery' AND u.is_active = TRUE";
 $delivery_personnel_result = mysqli_query($connection, $delivery_personnel_sql);
@@ -379,7 +379,7 @@ $assigned_orders_admin_sql = "SELECT o.order_id, o.total_amount, u.name as custo
                               JOIN user u ON o.user_id = u.user_id 
                               LEFT JOIN delivery d ON d.order_id = o.order_id 
                               LEFT JOIN user u2 ON d.delivery_person_id = u2.user_id 
-                              WHERE d.status IN ('Assigned','Picked Up','On the Way')
+                              WHERE d.status IN ('Assigned','Picked Up','On the way')
                               ORDER BY o.order_date DESC";
 $assigned_orders_admin_result = mysqli_query($connection, $assigned_orders_admin_sql);
 
