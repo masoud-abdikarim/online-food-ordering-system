@@ -6,10 +6,10 @@ if (!extension_loaded('mysqli')) {
 
 // Database configuration
 // IMPORTANT: Update these credentials for your InfinityFree account
-$host = "sql110.infinityfree.com";
-$user = "if0_40761766";
-$password = "maskax470"; // <-- put your real vPanel password
-$database = "if0_40761766_ateye";
+$host = "localhost";
+$user = "root";
+$password = "123456"; // <-- put your real vPanel password
+$database = "kaah";
 
 // Enable error reporting for debugging (disable in production)
 // error_reporting(E_ALL);
