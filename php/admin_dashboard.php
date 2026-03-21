@@ -1,12 +1,6 @@
 <?php
-session_start();
-require_once('config.php');
-
-// Check if user is logged in and is admin
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type']) || $_SESSION['user_type'] != 'Admin') {
-    header("Location: login.php");
-    exit();
-}
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(['Admin'], 'html');
 
 // Safely get session variables with defaults
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
@@ -1623,6 +1617,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
         </div>
     </div>
 
+    <script src="../js/session_idle.js" defer></script>
     <script>
         // Mobile drawer: body.sidebar-open + overlay (see admin_dashboard.css)
         function toggleSidebar() {
@@ -1679,12 +1674,25 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
             if (!body) return;
             body.innerHTML = '<p class="text-muted">Loading…</p>';
             openModal('adminOrderDetailModal');
-            fetch('get_order_details_admin.php?order_id=' + encodeURIComponent(orderId))
-                .then(r => {
+            fetch('get_order_details_admin.php?order_id=' + encodeURIComponent(orderId), {
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(async r => {
+                    if (r.status === 401) {
+                        try {
+                            const j = await r.json();
+                            window.location.href = (j && j.redirect) ? j.redirect : 'login.php?timeout=1';
+                        } catch (e) {
+                            window.location.href = 'login.php?timeout=1';
+                        }
+                        return;
+                    }
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     return r.text();
                 })
                 .then(html => {
+                    if (html === undefined) return;
                     body.innerHTML = html;
                 })
                 .catch(err => {
@@ -1704,9 +1712,24 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
         // Edit menu item
         function editMenuItem(itemId) {
             // Fetch item details via AJAX
-            fetch(`get_menu_item.php?id=${itemId}`)
-                .then(response => response.json())
+            fetch(`get_menu_item.php?id=${itemId}`, {
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(async response => {
+                    if (response.status === 401) {
+                        try {
+                            const j = await response.json();
+                            window.location.href = (j && j.redirect) ? j.redirect : 'login.php?timeout=1';
+                        } catch (e) {
+                            window.location.href = 'login.php?timeout=1';
+                        }
+                        return null;
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    if (!data) return;
                     if (data.success) {
                         document.getElementById('edit_item_id').value = data.item.item_id;
                         document.getElementById('edit_name').value = data.item.name;

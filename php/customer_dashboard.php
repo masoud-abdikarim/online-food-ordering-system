@@ -1,12 +1,6 @@
 <?php
-session_start();
-require_once('config.php');
-
-// Check if user is logged in and is a customer
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Customer') {
-    header("Location: login.php");
-    exit();
-}
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(['Customer'], 'html');
 
 $user_id = $_SESSION['user_id'];
 $user_name = $_SESSION['name'];
@@ -664,6 +658,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
         </div>
     </div>
 
+    <script src="../js/session_idle.js" defer></script>
     <script>
         // Toggle sidebar on mobile
         function toggleSidebar() {
@@ -888,10 +883,23 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify(orderData)
             })
-            .then(response => response.json())
+            .then(async response => {
+                if (response.status === 401) {
+                    try {
+                        const j = await response.json();
+                        window.location.href = (j && j.redirect) ? j.redirect : 'login.php?timeout=1';
+                    } catch (e) {
+                        window.location.href = 'login.php?timeout=1';
+                    }
+                    return null;
+                }
+                return response.json();
+            })
             .then(data => {
+                if (!data) return;
                 if (!data.success) {
                     if (Array.isArray(data.removed_items) && data.removed_items.length > 0) {
                         let cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -933,9 +941,27 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
         
         function cancelOrder(orderId) {
             if (confirm('Are you sure you want to cancel this order?')) {
-                fetch(`cancel_order.php?id=${orderId}`)
-                    .then(response => response.json())
+                fetch(`cancel_order.php?id=${orderId}`, {
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(async response => {
+                        if (response.status === 401) {
+                            try {
+                                const j = await response.json();
+                                window.location.href = (j && j.redirect) ? j.redirect : 'login.php?timeout=1';
+                            } catch (e) {
+                                window.location.href = 'login.php?timeout=1';
+                            }
+                            return null;
+                        }
+                        return response.json();
+                    })
                     .then(data => {
+                        if (!data) return;
                         if (data.success) {
                             showNotification('Order cancelled successfully', 'warning');
                             setTimeout(() => location.reload(), 1000);

@@ -1,11 +1,6 @@
 <?php
-session_start();
-require_once('config.php');
-
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Customer') {
-    header("Location: login.php");
-    exit();
-}
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(['Customer'], 'html');
 
 $user_id = intval($_SESSION['user_id']);
 $success = '';
@@ -152,6 +147,7 @@ if (isset($_POST['change_password'])) {
             <a class="btn" href="customer_dashboard.php"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
         </div>
     </div>
+    <script src="../js/session_idle.js" defer></script>
 </body>
 </html>
 

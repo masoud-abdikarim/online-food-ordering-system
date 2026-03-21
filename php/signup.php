@@ -1,6 +1,5 @@
 <?php
-session_start();
-require_once('config.php');
+require_once __DIR__ . '/session_bootstrap.php';
 $errors = [];
 $old_data = [];
 if (isset($_POST['submit'])) {
@@ -37,6 +36,8 @@ if (isset($_POST['submit'])) {
                 $_SESSION['user_type'] = $user_type;
                 $_SESSION['phone'] = $phone;
                 $_SESSION['logged_in'] = true;
+                $_SESSION['last_activity'] = time();
+                session_regenerate_id(true);
                 header("Location: customer_dashboard.php");
                 exit();
             } else {

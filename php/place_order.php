@@ -1,13 +1,8 @@
 <?php
-session_start();
-require_once('config.php');
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(['Customer'], 'auto');
 
 header('Content-Type: application/json');
-
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Customer') {
-    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
-    exit();
-}
 
 $user_id = $_SESSION['user_id'];
 $data = json_decode(file_get_contents('php://input'), true);

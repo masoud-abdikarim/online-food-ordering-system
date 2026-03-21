@@ -1,11 +1,7 @@
 <?php
-session_start();
-require_once('config.php');
-
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Delivery') {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit();
-}
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(['Delivery'], 'auto');
+header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $delivery_id = intval($_POST['delivery_id']);

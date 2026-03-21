@@ -1,11 +1,6 @@
 <?php
-session_start();
-require_once('config.php');
-
-// Check if user is logged in and is delivery person
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Delivery') {
-    die("Unauthorized access");
-}
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(['Delivery'], 'auto');
 
 $order_id = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
 $user_id = $_SESSION['user_id'];

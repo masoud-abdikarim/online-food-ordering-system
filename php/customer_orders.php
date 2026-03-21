@@ -1,12 +1,6 @@
 <?php
-session_start();
-require_once('config.php');
-
-// Check if user is logged in and is a customer
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Customer') {
-    header("Location: login.php");
-    exit();
-}
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(['Customer'], 'html');
 
 $user_id = $_SESSION['user_id'];
 $user_name = $_SESSION['name'];
@@ -333,5 +327,6 @@ $stats = mysqli_fetch_assoc($stats_result);
             });
         });
     </script>
+    <script src="../js/session_idle.js" defer></script>
 </body>
 </html>

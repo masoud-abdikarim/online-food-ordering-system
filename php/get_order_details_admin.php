@@ -3,16 +3,10 @@
  * Full order details for Admin (items, customer, address).
  * GET: order_id
  */
-session_start();
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(['Admin'], 'auto');
 
 header('Content-Type: text/html; charset=utf-8');
-
-if (!isset($_SESSION['user_id']) || ($_SESSION['user_type'] ?? '') !== 'Admin') {
-    http_response_code(403);
-    echo '<p class="text-danger">Unauthorized</p>';
-    exit;
-}
 
 $order_id = isset($_GET['order_id']) ? (int)$_GET['order_id'] : 0;
 if ($order_id <= 0) {

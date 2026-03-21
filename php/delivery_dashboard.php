@@ -1,12 +1,6 @@
 <?php
-session_start();
-require_once('config.php');
-
-// Check if user is logged in and is delivery person
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Delivery') {
-    header("Location: login.php");
-    exit();
-}
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(['Delivery'], 'html');
 
 $user_id = $_SESSION['user_id'];
 $user_name = $_SESSION['name'];
@@ -499,6 +493,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
         </div>
     </div>
 
+    <script src="../js/session_idle.js" defer></script>
     <script>
         // Show/hide sections
         function showSection(sectionId) {
@@ -523,9 +518,24 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
         // Show order details
         function showOrderDetails(orderId) {
             // Load order details via AJAX
-            fetch(`get_order_details.php?order_id=${orderId}`)
-                .then(response => response.text())
+            fetch(`get_order_details.php?order_id=${orderId}`, {
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(async response => {
+                    if (response.status === 401) {
+                        try {
+                            const j = await response.json();
+                            window.location.href = (j && j.redirect) ? j.redirect : 'login.php?timeout=1';
+                        } catch (e) {
+                            window.location.href = 'login.php?timeout=1';
+                        }
+                        return;
+                    }
+                    return response.text();
+                })
                 .then(data => {
+                    if (data === undefined) return;
                     document.getElementById('orderDetailsContent').innerHTML = data;
                     document.getElementById('orderDetailsModal').style.display = 'flex';
                 })

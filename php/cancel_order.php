@@ -1,16 +1,12 @@
 <?php
-session_start();
-require_once('config.php');
+require_once __DIR__ . '/session_auth.php';
 
-$wants_json = isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
+$wants_json = session_wants_json_response();
 if ($wants_json) {
     header('Content-Type: application/json');
 }
 
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
-    exit();
-}
+require_authenticated_session(['Customer'], $wants_json ? 'json' : 'html');
 
 $user_id = $_SESSION['user_id'];
 $order_id = isset($_GET['id']) ? intval($_GET['id']) : 0;

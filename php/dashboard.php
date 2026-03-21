@@ -1,12 +1,6 @@
 <?php
-session_start();
-require_once('config.php');
-
-// Check if user is logged in
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type'])) {
-    header("Location: login.php");
-    exit();
-}
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(null, 'html');
 
 // Route based on user type
 switch ($_SESSION['user_type']) {

@@ -1,13 +1,6 @@
 <?php
-session_start();
-require_once('config.php');
-
-// Check if user is logged in and is admin
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Admin') {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
-    exit();
-}
+require_once __DIR__ . '/session_auth.php';
+require_authenticated_session(['Admin'], 'auto');
 
 $item_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
