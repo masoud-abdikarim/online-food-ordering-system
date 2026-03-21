@@ -447,6 +447,8 @@ body.kaah-admin.sidebar-collapsed .main-content {
 }
 .kaah-admin .status-pending { background: #fffbeb; color: #b45309; }
 .kaah-admin .status-preparing { background: #eff6ff; color: #1d4ed8; }
+.kaah-admin .status-approved { background: #ecfdf5; color: #047857; }
+.kaah-admin .status-assigned { background: #eef2ff; color: #4338ca; }
 .kaah-admin .status-ontheway, .kaah-admin .status-on-the-way { background: #ecfdf5; color: #047857; }
 .kaah-admin .status-delivered { background: #d1fae5; color: #065f46; }
 .kaah-admin .status-cancelled, .kaah-admin .status-rejected { background: #fef2f2; color: #b91c1c; }

@@ -72,7 +72,7 @@ $assigned_orders_sql = "SELECT
     u.phone as customer_phone
 FROM delivery d
 JOIN orders o ON d.order_id = o.order_id
-JOIN user u ON o.user_id = u.user_id
+JOIN `user` u ON o.user_id = u.user_id
 WHERE d.delivery_person_id = $user_id
 AND d.status != 'Delivered'
 ORDER BY 
@@ -100,7 +100,7 @@ $completed_deliveries_sql = "SELECT
     u.name as customer_name
 FROM delivery d
 JOIN orders o ON d.order_id = o.order_id
-JOIN user u ON o.user_id = u.user_id
+JOIN `user` u ON o.user_id = u.user_id
 WHERE d.delivery_person_id = $user_id
 AND d.status = 'Delivered'
 ORDER BY o.order_date DESC

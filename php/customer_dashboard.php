@@ -170,13 +170,23 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                 </div>
             </div>
             
+            <div class="stat-card" onclick="showTab('preparing')">
+                <div class="stat-icon" style="background: #e7f1ff;">
+                    <i class="fas fa-check-circle" style="color: #0d47a1;"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><?php echo $preparing_orders_result ? mysqli_num_rows($preparing_orders_result) : 0; ?></h3>
+                    <p>Approved</p>
+                </div>
+            </div>
+            
             <div class="stat-card" onclick="showTab('ontheway')">
                 <div class="stat-icon" style="background: #d4edda;">
                     <i class="fas fa-shipping-fast" style="color: #155724;"></i>
                 </div>
                 <div class="stat-info">
                     <h3><?php echo $ontheway_orders_result ? mysqli_num_rows($ontheway_orders_result) : 0; ?></h3>
-                    <p>On The Way</p>
+                    <p>Out for delivery</p>
                 </div>
             </div>
             
@@ -360,11 +370,11 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
             </div>
         </div>
 
-        <!-- Tab: Preparing Orders -->
+        <!-- Tab: Approved (waiting for driver) -->
         <div id="preparing-tab" class="tab-content">
             <div class="orders-table">
                 <div class="table-header">
-                    <h3><i class="fas fa-utensils"></i> Preparing Orders</h3>
+                    <h3><i class="fas fa-check-circle"></i> Approved — waiting for driver</h3>
                 </div>
                 <table>
                     <thead>
@@ -390,17 +400,17 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                             <td><?php echo $item_count; ?> items</td>
                             <td>$<?php echo number_format($order['total_amount'], 2); ?></td>
                             <td>
-                                <span class="status-badge status-preparing">
+                                <span class="status-badge status-approved">
                                     <?php echo $order['status']; ?>
                                 </span>
-                                <br><small>Your food is being prepared</small>
+                                <br><small>Restaurant approved — assigning a driver</small>
                             </td>
                         </tr>
                         <?php endwhile; else: ?>
                         <tr>
                             <td colspan="5" class="text-center" style="padding: 40px;">
                                 <i class="fas fa-utensils" style="font-size: 2rem; color: #ccc; margin-bottom: 10px;"></i>
-                                <p>No orders being prepared</p>
+                                <p>No approved orders waiting for a driver</p>
                             </td>
                         </tr>
                         <?php endif; ?>
@@ -413,7 +423,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
         <div id="ontheway-tab" class="tab-content">
             <div class="orders-table">
                 <div class="table-header">
-                    <h3><i class="fas fa-shipping-fast"></i> Orders On The Way</h3>
+                    <h3><i class="fas fa-shipping-fast"></i> Out for delivery</h3>
                 </div>
                 <table>
                     <thead>
@@ -440,7 +450,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                             <td><?php echo $item_count; ?> items</td>
                             <td>$<?php echo number_format($order['total_amount'], 2); ?></td>
                             <td>
-                                <span class="status-badge status-ontheway">On the way</span>
+                                <span class="status-badge status-<?php echo strtolower(str_replace(' ', '-', $order['status'])); ?>"><?php echo htmlspecialchars($order['status']); ?></span>
                                 <?php if (!empty($order['delivery_person_name'])): ?>
                                     <br><small class="text-muted"><?php echo htmlspecialchars($order['delivery_person_name']); ?></small>
                                 <?php endif; ?>

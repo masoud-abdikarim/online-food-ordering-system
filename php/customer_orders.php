@@ -14,9 +14,9 @@ $where_clause = "o.user_id = $user_id";
 if ($filter == 'pending') {
     $where_clause .= " AND o.status = 'Pending'";
 } elseif ($filter == 'preparing') {
-    $where_clause .= " AND o.status = 'Preparing'";
+    $where_clause .= " AND o.status = 'Approved'";
 } elseif ($filter == 'delivery') {
-    $where_clause .= " AND o.status = 'On the way'";
+    $where_clause .= " AND o.status IN ('Assigned','On the way')";
 } elseif ($filter == 'delivered') {
     $where_clause .= " AND o.status = 'Delivered'";
 }
@@ -41,8 +41,8 @@ $orders_result = mysqli_query($connection, $orders_sql);
 $stats_sql = "SELECT 
                 COUNT(*) as total_orders,
                 SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pending,
-                SUM(CASE WHEN status = 'Preparing' THEN 1 ELSE 0 END) as preparing,
-                SUM(CASE WHEN status = 'On the way' THEN 1 ELSE 0 END) as on_the_way,
+                SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) as preparing,
+                SUM(CASE WHEN status IN ('Assigned','On the way') THEN 1 ELSE 0 END) as on_the_way,
                 SUM(CASE WHEN status = 'Delivered' THEN 1 ELSE 0 END) as delivered,
                 SUM(total_amount) as total_spent
               FROM orders 
@@ -171,7 +171,7 @@ $stats = mysqli_fetch_assoc($stats_result);
                         <i class="fas fa-clock"></i> Pending
                     </a>
                     <a href="?filter=preparing" class="filter-tab <?php echo $filter == 'preparing' ? 'active' : ''; ?>">
-                        <i class="fas fa-utensils"></i> Preparing
+                        <i class="fas fa-check-circle"></i> Approved
                     </a>
                     <a href="?filter=delivery" class="filter-tab <?php echo $filter == 'delivery' ? 'active' : ''; ?>">
                         <i class="fas fa-shipping-fast"></i> On The Way

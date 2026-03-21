@@ -127,8 +127,16 @@ if ($delivery_result !== false && mysqli_num_rows($delivery_result) > 0) {
             </header>
 
             <!-- Order Status Timeline -->
+            <?php
+            $os = $order['status'];
+            $step1_done = $os !== 'Pending';
+            $step2_done = in_array($os, ['Assigned', 'On the way', 'Delivered'], true);
+            $step3_done = $os === 'Delivered';
+            $step2_active = in_array($os, ['Approved', 'Preparing'], true);
+            $step3_active = in_array($os, ['Assigned', 'On the way'], true);
+            ?>
             <div class="order-timeline">
-                <div class="timeline-step <?php echo $order['status'] == 'Pending' ? 'active' : 'completed'; ?>">
+                <div class="timeline-step <?php echo $os === 'Pending' ? 'active' : ($step1_done ? 'completed' : ''); ?>">
                     <div class="step-icon">
                         <i class="fas fa-clock"></i>
                     </div>
@@ -138,27 +146,27 @@ if ($delivery_result !== false && mysqli_num_rows($delivery_result) > 0) {
                     </div>
                 </div>
                 
-                <div class="timeline-step <?php echo $order['status'] == 'Preparing' ? 'active' : ($order['status'] == 'On the way' || $order['status'] == 'Delivered' ? 'completed' : ''); ?>">
+                <div class="timeline-step <?php echo $step2_active ? 'active' : ($step2_done && !$step2_active ? 'completed' : ''); ?>">
                     <div class="step-icon">
-                        <i class="fas fa-utensils"></i>
+                        <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="step-info">
-                        <h4>Preparing</h4>
-                        <p>Restaurant is preparing your order</p>
+                        <h4>Approved</h4>
+                        <p>Approved — waiting for a driver to be assigned</p>
                     </div>
                 </div>
                 
-                <div class="timeline-step <?php echo $order['status'] == 'On the way' ? 'active' : ($order['status'] == 'Delivered' ? 'completed' : ''); ?>">
+                <div class="timeline-step <?php echo $step3_active ? 'active' : ($step3_done ? 'completed' : ''); ?>">
                     <div class="step-icon">
                         <i class="fas fa-motorcycle"></i>
                     </div>
                     <div class="step-info">
-                        <h4>On the way</h4>
-                        <p>Your order is out for delivery</p>
+                        <h4>Out for delivery</h4>
+                        <p>Driver assigned — on the way to you</p>
                     </div>
                 </div>
                 
-                <div class="timeline-step <?php echo $order['status'] == 'Delivered' ? 'active completed' : ''; ?>">
+                <div class="timeline-step <?php echo $os === 'Delivered' ? 'active completed' : ''; ?>">
                     <div class="step-icon">
                         <i class="fas fa-check-circle"></i>
                     </div>

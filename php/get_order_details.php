@@ -21,7 +21,7 @@ $sql = "SELECT
     d.assigned_at,
     d.delivered_at
 FROM orders o
-JOIN user u ON o.user_id = u.user_id
+JOIN `user` u ON o.user_id = u.user_id
 JOIN delivery d ON d.order_id = o.order_id AND d.delivery_person_id = $user_id
 LEFT JOIN address a ON o.order_id = a.order_id
 WHERE o.order_id = $order_id";

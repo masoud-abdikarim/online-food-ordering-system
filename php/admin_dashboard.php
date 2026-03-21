@@ -1247,10 +1247,13 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
         <!-- Section 8: Order History -->
         <div id="order-history" class="section" style="display: none;">
             <div class="section-header">
-                <h2>Order History</h2>
+                <h2>Order history</h2>
             </div>
+            <p class="text-muted" style="margin-bottom:16px;font-size:0.9rem;">
+                Completed and rejected orders only. Active work stays in <strong>New orders</strong>, <strong>Waiting assignment</strong>, or <strong>Active deliveries</strong>.
+            </p>
             <div class="table-responsive">
-                <h3>Today's Orders</h3>
+                <h3>Today — Delivered / Rejected</h3>
                 <table class="orders-table">
                     <thead>
                         <tr>
@@ -1286,7 +1289,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                     </tbody>
                 </table>
 
-                <h3 style="margin-top: 30px;">Yesterday's Orders</h3>
+                <h3 style="margin-top: 30px;">Yesterday — Delivered / Rejected</h3>
                 <table class="orders-table">
                     <thead>
                         <tr>
