@@ -151,45 +151,55 @@ if (isset($_POST['activate_user'])) {
 
 // Handle menu item actions
 if (isset($_POST['add_menu_item'])) {
-    $name = mysqli_real_escape_string($connection, $_POST['name']);
-    $description = mysqli_real_escape_string($connection, $_POST['description']);
-    $price = floatval($_POST['price']);
-    $image_url = mysqli_real_escape_string($connection, $_POST['image_url']);
-    $category = mysqli_real_escape_string($connection, $_POST['category']);
-    
-    $sql = "INSERT INTO menuitem (name, description, price, image_url, category) 
-            VALUES ('$name', '$description', $price, '$image_url', '$category')";
-    
-    if (mysqli_query($connection, $sql)) {
-        $message = "Menu item added successfully!";
+    $img_raw = $_POST['image_url'] ?? '';
+    if (strlen($img_raw) > 12000000) {
+        $error = "Image URL or pasted image data is too large (max ~12 MB). Use a smaller image or host it online and paste a link.";
     } else {
-        $error = "Error: " . mysqli_error($connection);
+        $name = mysqli_real_escape_string($connection, $_POST['name']);
+        $description = mysqli_real_escape_string($connection, $_POST['description']);
+        $price = floatval($_POST['price']);
+        $image_url = mysqli_real_escape_string($connection, $img_raw);
+        $category = mysqli_real_escape_string($connection, $_POST['category']);
+        
+        $sql = "INSERT INTO menuitem (name, description, price, image_url, category) 
+                VALUES ('$name', '$description', $price, '$image_url', '$category')";
+        
+        if (mysqli_query($connection, $sql)) {
+            $message = "Menu item added successfully!";
+        } else {
+            $error = "Error: " . mysqli_error($connection);
+        }
     }
 }
 
 // Handle menu item update
 if (isset($_POST['update_menu_item'])) {
-    $item_id = intval($_POST['item_id']);
-    $name = mysqli_real_escape_string($connection, $_POST['name']);
-    $description = mysqli_real_escape_string($connection, $_POST['description']);
-    $price = floatval($_POST['price']);
-    $image_url = mysqli_real_escape_string($connection, $_POST['image_url']);
-    $category = mysqli_real_escape_string($connection, $_POST['category']);
-    $is_available = isset($_POST['is_available']) ? 1 : 0;
-    
-    $sql = "UPDATE menuitem SET 
-            name = '$name', 
-            description = '$description', 
-            price = $price, 
-            image_url = '$image_url',
-            category = '$category',
-            is_available = $is_available 
-            WHERE item_id = $item_id";
-    
-    if (mysqli_query($connection, $sql)) {
-        $message = "Menu item updated successfully!";
+    $img_raw = $_POST['image_url'] ?? '';
+    if (strlen($img_raw) > 12000000) {
+        $error = "Image URL or pasted image data is too large (max ~12 MB). Use a smaller image or host it online and paste a link.";
     } else {
-        $error = "Error: " . mysqli_error($connection);
+        $item_id = intval($_POST['item_id']);
+        $name = mysqli_real_escape_string($connection, $_POST['name']);
+        $description = mysqli_real_escape_string($connection, $_POST['description']);
+        $price = floatval($_POST['price']);
+        $image_url = mysqli_real_escape_string($connection, $img_raw);
+        $category = mysqli_real_escape_string($connection, $_POST['category']);
+        $is_available = isset($_POST['is_available']) ? 1 : 0;
+        
+        $sql = "UPDATE menuitem SET 
+                name = '$name', 
+                description = '$description', 
+                price = $price, 
+                image_url = '$image_url',
+                category = '$category',
+                is_available = $is_available 
+                WHERE item_id = $item_id";
+        
+        if (mysqli_query($connection, $sql)) {
+            $message = "Menu item updated successfully!";
+        } else {
+            $error = "Error: " . mysqli_error($connection);
+        }
     }
 }
 
@@ -1214,9 +1224,9 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                         <small>Or enter new category: <input type="text" name="new_category" class="form-control" style="margin-top: 5px;" placeholder="New category name"></small>
                     </div>
                     <div class="form-group">
-                        <label>Image URL</label>
-                        <input type="url" name="image_url" class="form-control" placeholder="https://example.com/image.jpg">
-                        <small>Leave empty for default image</small>
+                        <label>Image URL or data</label>
+                        <textarea name="image_url" class="form-control" rows="3" placeholder="https://example.com/image.jpg — or paste data:image/jpeg;base64,... (long)"></textarea>
+                        <small class="text-muted">Use a normal link when possible. Base64 data URIs work after the database column is <code>MEDIUMTEXT</code> (run <code>php/migrate_menu_image_url.php</code> once if you still see “Data too long”).</small>
                     </div>
                     <div class="form-group">
                         <div class="form-checkbox">
@@ -1272,8 +1282,8 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Image URL</label>
-                        <input type="url" name="image_url" id="edit_image_url" class="form-control">
+                        <label>Image URL or data</label>
+                        <textarea name="image_url" id="edit_image_url" class="form-control" rows="3" placeholder="HTTPS link or data URI"></textarea>
                     </div>
                     <div class="form-group">
                         <div class="form-checkbox">

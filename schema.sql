@@ -31,7 +31,7 @@ CREATE TABLE `menuitem` (
   `name` VARCHAR(100) NOT NULL,
   `description` TEXT NULL,
   `price` DECIMAL(10,2) NOT NULL,
-  `image_url` VARCHAR(255) NULL,
+  `image_url` MEDIUMTEXT NULL,
   `category` VARCHAR(100) NULL,
   `is_available` TINYINT(1) NOT NULL DEFAULT 1,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

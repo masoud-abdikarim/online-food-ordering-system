@@ -22,7 +22,7 @@ $tables = [
         name VARCHAR(100) NOT NULL,
         description TEXT,
         price DECIMAL(10, 2) NOT NULL,
-        image_url VARCHAR(255),
+        image_url MEDIUMTEXT,
         is_available BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )",
@@ -73,6 +73,13 @@ foreach ($tables as $name => $sql) {
     } else {
         echo "<p style='color: red;'>Error creating table '$name': " . mysqli_error($connection) . "</p>";
     }
+}
+
+// Widen image_url for long HTTPS URLs or data:image/...;base64,... strings (VARCHAR(255) is too small)
+if (mysqli_query($connection, "ALTER TABLE menuitem MODIFY COLUMN image_url MEDIUMTEXT NULL")) {
+    echo "<p style='color: green;'>Column <code>menuitem.image_url</code> is set to MEDIUMTEXT (long image URLs / base64 OK).</p>";
+} else {
+    echo "<p style='color: orange;'>Could not run ALTER on menuitem.image_url: " . htmlspecialchars(mysqli_error($connection)) . " — run <code>php/migrate_menu_image_url.php</code> manually.</p>";
 }
 
 // Check if default admin exists
