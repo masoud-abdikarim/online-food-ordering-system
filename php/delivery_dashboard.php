@@ -173,6 +173,17 @@ if ($delivery_info_result) {
 } else {
     $delivery_info = [];
 }
+
+$__sn = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
+if ($__sn === '' || $__sn[0] !== '/') {
+    $__sn = '/' . ltrim($__sn, '/');
+}
+$__app_root = str_replace('\\', '/', dirname(dirname($__sn)));
+if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
+    $delivery_css_href = '/css/kaah-delivery.css';
+} else {
+    $delivery_css_href = rtrim($__app_root, '/') . '/css/kaah-delivery.css';
+}
 ?>
 
 <!DOCTYPE html>
@@ -181,337 +192,21 @@ if ($delivery_info_result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery Dashboard - Kaah Fast Food</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* ... (keep all your existing CSS styles) ... */
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-            background: #f5f5f5;
-        }
-        
-        .sidebar {
-            width: 250px;
-            background: #2c3e50;
-            color: white;
-            padding: 20px;
-        }
-        
-        .main-content {
-            flex: 1;
-            padding: 20px;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        
-        .stat-info h3 {
-            margin: 0;
-            font-size: 24px;
-            color: #2c3e50;
-        }
-        
-        .stat-info p {
-            margin: 5px 0 0 0;
-            color: #7f8c8d;
-        }
-        
-        .orders-table {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        
-        .table-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .status-assigned {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .status-picked {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-        
-        .status-ontheway {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-delivered {
-            background: #c3e6cb;
-            color: #155724;
-        }
-        
-        .btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            text-decoration: none;
-        }
-        
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-        
-        .btn-warning {
-            background: #f39c12;
-            color: white;
-        }
-        
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-        
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 30px;
-            border-radius: 10px;
-            width: 50%;
-            max-width: 500px;
-        }
-        
-        .close {
-            float: right;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .customer-info-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .info-row {
-            display: flex;
-            margin-bottom: 10px;
-        }
-        
-        .info-label {
-            width: 120px;
-            font-weight: 600;
-            color: #7f8c8d;
-        }
-        
-        .info-value {
-            flex: 1;
-            color: #2c3e50;
-        }
-        
-        .delivery-status-timeline {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-            position: relative;
-        }
-        
-        .delivery-status-timeline::before {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #eee;
-            z-index: 1;
-        }
-        
-        .timeline-step {
-            text-align: center;
-            position: relative;
-            z-index: 2;
-            flex: 1;
-        }
-        
-        .step-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid #eee;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-            color: #7f8c8d;
-        }
-        
-        .step-active .step-icon {
-            background: #3498db;
-            border-color: #3498db;
-            color: white;
-        }
-        
-        .step-completed .step-icon {
-            background: #27ae60;
-            border-color: #27ae60;
-            color: white;
-        }
-        
-        .step-label {
-            font-size: 12px;
-            color: #7f8c8d;
-        }
-        
-        .step-active .step-label {
-            color: #3498db;
-            font-weight: 600;
-        }
-        
-        .step-completed .step-label {
-            color: #27ae60;
-        }
-        
-        @media (max-width: 768px) {
-            .dashboard-container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .modal-content {
-                width: 90%;
-                margin: 20% auto;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($delivery_css_href, ENT_QUOTES, 'UTF-8'); ?>">
 </head>
-<body>
+<body class="kaah-delivery">
     <div class="dashboard-container">
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fas fa-motorcycle"></i> Kaah Fast Food</h2>
-                <span class="user-role">Delivery Dashboard</span>
+            <div class="kaah-brand">
+                <div class="kaah-brand__logo"><i class="fas fa-motorcycle"></i></div>
+                <div class="kaah-brand__text">
+                    <strong>Kaah Fast Food</strong>
+                    <span><i class="fas fa-location-dot"></i> New Hargeisa · Delivery</span>
+                </div>
             </div>
             
             <div class="user-info">
@@ -526,18 +221,13 @@ if ($delivery_info_result) {
             <nav class="sidebar-nav">
                 <ul>
                     <li class="active">
-                        <a href="delivery_dashboard.php">
-                            <i class="fas fa-home"></i> Dashboard
+                        <a href="#assigned-orders" onclick="showSection('assigned-orders'); return false;">
+                            <i class="fas fa-clipboard-list"></i> Active deliveries
                         </a>
                     </li>
                     <li>
-                        <a href="#assigned-orders" onclick="showSection('assigned-orders')">
-                            <i class="fas fa-clipboard-list"></i> Assigned Orders
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#completed-deliveries" onclick="showSection('completed-deliveries')">
-                            <i class="fas fa-check-circle"></i> Completed Deliveries
+                        <a href="#completed-deliveries" onclick="showSection('completed-deliveries'); return false;">
+                            <i class="fas fa-circle-check"></i> Completed
                         </a>
                     </li>
                     <li>
@@ -557,8 +247,8 @@ if ($delivery_info_result) {
         <main class="main-content">
             <header class="dashboard-header">
                 <div class="header-left">
-                    <h1>Delivery Dashboard</h1>
-                    <p>Welcome back, <?php echo htmlspecialchars($user_name); ?>!</p>
+                    <h1>Delivery console</h1>
+                    <p><?php echo htmlspecialchars($user_name); ?> · Kaah Fast Food, <strong>New Hargeisa</strong> — pick up, update status, deliver fast.</p>
                 </div>
                 <div class="header-right">
                     <span class="current-date"><?php echo date('F d, Y'); ?></span>
@@ -703,10 +393,10 @@ if ($delivery_info_result) {
                             </tbody>
                         </table>
                     <?php else: ?>
-                        <div style="padding: 40px; text-align: center; color: #7f8c8d;">
-                            <i class="fas fa-clipboard-list" style="font-size: 48px; margin-bottom: 20px;"></i>
-                            <h3>No assigned orders</h3>
-                            <p>You don't have any orders assigned to you at the moment.</p>
+                        <div class="kd-empty">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3>No active deliveries</h3>
+                            <p>New assignments will appear here automatically.</p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -755,10 +445,10 @@ if ($delivery_info_result) {
                             </tbody>
                         </table>
                     <?php else: ?>
-                        <div style="padding: 40px; text-align: center; color: #7f8c8d;">
-                            <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 20px;"></i>
-                            <h3>No completed deliveries</h3>
-                            <p>You haven't completed any deliveries yet.</p>
+                        <div class="kd-empty">
+                            <i class="fas fa-circle-check"></i>
+                            <h3>No completed deliveries yet</h3>
+                            <p>Finished drops show up here for your records.</p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -812,24 +502,22 @@ if ($delivery_info_result) {
     <script>
         // Show/hide sections
         function showSection(sectionId) {
-            // Hide all sections
             document.querySelectorAll('.section').forEach(section => {
                 section.style.display = 'none';
                 section.classList.remove('active-section');
             });
-            
-            // Show selected section
             const section = document.getElementById(sectionId);
             if (section) {
                 section.style.display = 'block';
                 section.classList.add('active-section');
             }
-            
-            // Update active nav
+            document.querySelectorAll('.sidebar-nav li').forEach(li => li.classList.remove('active'));
             document.querySelectorAll('.sidebar-nav a').forEach(link => {
-                link.parentElement.classList.remove('active');
+                const href = link.getAttribute('href');
+                if (href === '#' + sectionId) {
+                    link.parentElement.classList.add('active');
+                }
             });
-            event.target.parentElement.classList.add('active');
         }
         
         // Show order details
@@ -839,7 +527,7 @@ if ($delivery_info_result) {
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('orderDetailsContent').innerHTML = data;
-                    document.getElementById('orderDetailsModal').style.display = 'block';
+                    document.getElementById('orderDetailsModal').style.display = 'flex';
                 })
                 .catch(error => {
                     document.getElementById('orderDetailsContent').innerHTML = `
@@ -847,7 +535,7 @@ if ($delivery_info_result) {
                             Error loading order details. Please try again.
                         </div>
                     `;
-                    document.getElementById('orderDetailsModal').style.display = 'block';
+                    document.getElementById('orderDetailsModal').style.display = 'flex';
                 });
         }
         
@@ -859,7 +547,7 @@ if ($delivery_info_result) {
         function showDeliveryCompleteModal(deliveryId, orderId) {
             document.getElementById('complete_delivery_id').value = deliveryId;
             document.getElementById('complete_order_id').value = orderId;
-            document.getElementById('deliveryCompleteModal').style.display = 'block';
+            document.getElementById('deliveryCompleteModal').style.display = 'flex';
         }
         
         function closeDeliveryCompleteModal() {

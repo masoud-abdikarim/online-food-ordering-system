@@ -57,6 +57,18 @@ if (!empty($cart)) {
         $cart_count += $item['quantity'];
     }
 }
+
+// Root-relative CSS URL
+$__sn = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
+if ($__sn === '' || $__sn[0] !== '/') {
+    $__sn = '/' . ltrim($__sn, '/');
+}
+$__app_root = str_replace('\\', '/', dirname(dirname($__sn)));
+if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
+    $customer_css_href = '/css/kaah-customer.css';
+} else {
+    $customer_css_href = rtrim($__app_root, '/') . '/css/kaah-customer.css';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -65,783 +77,15 @@ if (!empty($cart)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Dashboard - Kaah Fast Food</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --danger-color: #e74c3c;
-            --warning-color: #f39c12;
-            --light-bg: #f8f9fa;
-            --dark-text: #2c3e50;
-            --light-text: #7f8c8d;
-            --sidebar-width: 280px;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light-bg);
-            color: var(--dark-text);
-            line-height: 1.6;
-        }
-        
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        /* Fixed Sidebar */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--primary-color);
-            color: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            overflow-y: auto;
-            z-index: 100;
-            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
-        }
-        
-        .sidebar-header {
-            padding: 25px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .sidebar-header h2 {
-            color: white;
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .user-role {
-            color: #bdc3c7;
-            font-size: 0.9rem;
-        }
-        
-        .user-info {
-            padding: 25px 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 2rem;
-        }
-        
-        .user-info h3 {
-            margin-bottom: 5px;
-            font-size: 1.2rem;
-        }
-        
-        .user-info p {
-            color: #bdc3c7;
-            font-size: 0.9rem;
-        }
-        
-        .sidebar-nav ul {
-            list-style: none;
-            padding: 20px 0;
-        }
-        
-        .sidebar-nav li {
-            margin-bottom: 5px;
-        }
-        
-        .sidebar-nav a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px 25px;
-            color: #bdc3c7;
-            text-decoration: none;
-            transition: all 0.3s;
-            border-left: 4px solid transparent;
-        }
-        
-        .sidebar-nav a:hover {
-            background: rgba(255,255,255,0.05);
-            color: white;
-        }
-        
-        .sidebar-nav li.active a {
-            background: rgba(52, 152, 219, 0.1);
-            color: white;
-            border-left-color: var(--secondary-color);
-        }
-        
-        .sidebar-nav i {
-            width: 20px;
-            text-align: center;
-        }
-        
-        .cart-badge {
-            background: var(--danger-color);
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            margin-left: auto;
-        }
-        
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 30px;
-            min-height: 100vh;
-        }
-        
-        .dashboard-header {
-            background: white;
-            padding: 25px 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header-left h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
-        
-        .header-left p {
-            color: var(--light-text);
-        }
-        
-        .header-right {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        
-        .header-cart {
-            position: relative;
-        }
-        
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-        }
-        
-        .stat-info h3 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
-        
-        .stat-info p {
-            color: var(--light-text);
-            font-size: 0.95rem;
-        }
-        
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        
-        .tab-btn {
-            padding: 12px 25px;
-            background: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--light-text);
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .tab-btn.active {
-            background: var(--secondary-color);
-            color: white;
-        }
-        
-        .tab-btn:hover:not(.active) {
-            background: #f8f9fa;
-            color: var(--primary-color);
-        }
-        
-        /* Tab Content */
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* Orders Table */
-        .orders-table {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-        }
-        
-        .table-header {
-            padding: 25px 30px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .table-header h3 {
-            font-size: 1.3rem;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 18px 25px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: var(--primary-color);
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-        
-        tr:hover {
-            background: #f8f9fa;
-        }
-        
-        /* Status Badges */
-        .status-badge {
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-        
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .status-preparing {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-        
-        .status-ontheway {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-delivered {
-            background: #c3e6cb;
-            color: #155724;
-        }
-        
-        .status-cancelled {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-        }
-        
-        .btn-primary {
-            background: var(--secondary-color);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-        }
-        
-        .btn-success {
-            background: var(--success-color);
-            color: white;
-        }
-        
-        .btn-danger {
-            background: var(--danger-color);
-            color: white;
-        }
-        
-        .btn-warning {
-            background: var(--warning-color);
-            color: white;
-        }
-        
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-        }
-        
-        /* Menu Grid */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        
-        .menu-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .menu-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        
-        .menu-card-image {
-            height: 180px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .menu-card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-        
-        .menu-card:hover .menu-card-image img {
-            transform: scale(1.05);
-        }
-        
-        .menu-card-content {
-            padding: 20px;
-        }
-        
-        .menu-card-content h3 {
-            margin-bottom: 10px;
-            color: var(--primary-color);
-            font-size: 1.2rem;
-        }
-        
-        .menu-card-content p {
-            color: var(--light-text);
-            font-size: 0.95rem;
-            margin-bottom: 15px;
-            line-height: 1.5;
-            min-height: 60px;
-        }
-        
-        .menu-card-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .price {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--success-color);
-        }
-        
-        .btn-add-to-cart {
-            background: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: background 0.3s;
-        }
-        
-        .btn-add-to-cart:hover {
-            background: #2980b9;
-        }
-        
-        /* Cart Sidebar */
-        .cart-sidebar {
-            position: fixed;
-            top: 0;
-            right: -400px;
-            width: 400px;
-            height: 100vh;
-            background: white;
-            box-shadow: -5px 0 25px rgba(0,0,0,0.1);
-            z-index: 1000;
-            transition: right 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .cart-sidebar.active {
-            right: 0;
-        }
-        
-        .cart-header {
-            padding: 25px 30px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .cart-header h3 {
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .cart-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--light-text);
-        }
-        
-        .cart-items {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 30px;
-        }
-        
-        .cart-item {
-            display: flex;
-            gap: 15px;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .cart-item-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 8px;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-        
-        .cart-item-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .cart-item-details {
-            flex: 1;
-        }
-        
-        .cart-item-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
-        
-        .cart-item-price {
-            color: var(--success-color);
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .cart-item-quantity {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .quantity-btn {
-            width: 25px;
-            height: 25px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .cart-item-quantity span {
-            min-width: 30px;
-            text-align: center;
-        }
-        
-        .cart-item-remove {
-            background: none;
-            border: none;
-            color: var(--danger-color);
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-        
-        .cart-footer {
-            padding: 25px 30px;
-            border-top: 1px solid #eee;
-        }
-        
-        .cart-total {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        
-        .cart-total-amount {
-            color: var(--success-color);
-        }
-        
-        /* Cart Overlay */
-        .cart-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            display: none;
-        }
-        
-        .cart-overlay.active {
-            display: block;
-        }
-        
-        /* Checkout Modal */
-        .checkout-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1001;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .checkout-modal.active {
-            display: flex;
-        }
-        
-        .checkout-content {
-            background: white;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: modalSlideIn 0.3s ease;
-        }
-        
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        /* Delivery Info */
-        .delivery-info {
-            background: #e8f4fc;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 60px 30px;
-            color: var(--light-text);
-        }
-        
-        .empty-state i {
-            font-size: 4rem;
-            color: #ddd;
-            margin-bottom: 20px;
-        }
-        
-        .empty-state h3 {
-            margin-bottom: 10px;
-            color: var(--primary-color);
-        }
-        
-        /* Mobile Menu Toggle */
-        .mobile-menu-toggle {
-            display: none;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 99;
-            background: var(--primary-color);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s;
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 20px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .menu-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .dashboard-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .cart-sidebar {
-                width: 100%;
-                right: -100%;
-            }
-            
-            .mobile-menu-toggle {
-                display: flex;
-            }
-            
-            th, td {
-                padding: 12px 15px;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($customer_css_href, ENT_QUOTES, 'UTF-8'); ?>">
 </head>
-<body>
+<body class="kaah-customer">
+    <div class="sidebar-overlay" onclick="document.body.classList.remove('sidebar-open')" aria-hidden="true"></div>
     <!-- Mobile Menu Toggle -->
-    <div class="mobile-menu-toggle" onclick="toggleSidebar()">
+    <div class="mobile-menu-toggle" onclick="toggleSidebar()" aria-label="Open menu">
         <i class="fas fa-bars"></i>
     </div>
     
@@ -850,9 +94,12 @@ if (!empty($cart)) {
     
     <!-- Fixed Sidebar -->
     <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2><i class="fas fa-utensils"></i> Kaah Fast Food</h2>
-            <span class="user-role">Customer Dashboard</span>
+        <div class="kaah-brand">
+            <div class="kaah-brand__logo"><i class="fas fa-utensils"></i></div>
+            <div class="kaah-brand__text">
+                <strong>Kaah Fast Food</strong>
+                <span><i class="fas fa-location-dot"></i> New Hargeisa</span>
+            </div>
         </div>
         
         <div class="user-info">
@@ -866,22 +113,22 @@ if (!empty($cart)) {
         <nav class="sidebar-nav">
             <ul>
                 <li class="active">
-                    <a href="customer_dashboard.php">
+                    <a href="#orders" onclick="showTab('orders'); return false;">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
                 </li>
                 <li>
-                    <a href="#orders" onclick="showTab('orders')">
+                    <a href="#orders" onclick="showTab('orders'); return false;">
                         <i class="fas fa-shopping-bag"></i> My Orders
                     </a>
                 </li>
                 <li>
-                    <a href="#menu" onclick="showTab('menu')">
+                    <a href="#menu" onclick="showTab('menu'); return false;">
                         <i class="fas fa-utensils"></i> Order Food
                     </a>
                 </li>
                 <li>
-                    <a href="#cart" onclick="openCart()">
+                    <a href="#cart" onclick="openCart(); return false;">
                         <i class="fas fa-shopping-cart"></i> My Cart
                         <span class="cart-badge" id="sidebarCartCount"><?php echo $cart_count; ?></span>
                     </a>
@@ -905,8 +152,8 @@ if (!empty($cart)) {
         <!-- Header -->
         <header class="dashboard-header">
             <div class="header-left">
-                <h1>Welcome, <?php echo htmlspecialchars($user_name); ?>!</h1>
-                <p>Order delicious food from our menu</p>
+                <h1>Hi <?php echo htmlspecialchars($user_name); ?> — ready to order?</h1>
+                <p>Kaah Fast Food · <strong>New Hargeisa</strong> — browse the menu, track orders, checkout in seconds.</p>
             </div>
             <div class="header-right">
                 <button class="btn btn-primary" onclick="openCart()">
@@ -961,24 +208,24 @@ if (!empty($cart)) {
         </div>
 
         <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('orders')">
+        <div class="tabs" role="tablist">
+            <button type="button" class="tab-btn active" data-tab="orders" onclick="showTab('orders')">
                 <i class="fas fa-list"></i> All Orders
             </button>
-            <button class="tab-btn" onclick="showTab('pending')">
+            <button type="button" class="tab-btn" data-tab="pending" onclick="showTab('pending')">
                 <i class="fas fa-clock"></i> Pending
             </button>
-            <button class="tab-btn" onclick="showTab('preparing')">
+            <button type="button" class="tab-btn" data-tab="preparing" onclick="showTab('preparing')">
                 <i class="fas fa-utensils"></i> Preparing
             </button>
-            <button class="tab-btn" onclick="showTab('ontheway')">
-                <i class="fas fa-shipping-fast"></i> On The Way
+            <button type="button" class="tab-btn" data-tab="ontheway" onclick="showTab('ontheway')">
+                <i class="fas fa-shipping-fast"></i> Track order
             </button>
-            <button class="tab-btn" onclick="showTab('delivered')">
+            <button type="button" class="tab-btn" data-tab="delivered" onclick="showTab('delivered')">
                 <i class="fas fa-check-circle"></i> Delivered
             </button>
-            <button class="tab-btn" onclick="showTab('menu')">
-                <i class="fas fa-utensils"></i> Order Food
+            <button type="button" class="tab-btn" data-tab="menu" onclick="showTab('menu')">
+                <i class="fas fa-store"></i> Order now
             </button>
         </div>
 
@@ -1181,13 +428,14 @@ if (!empty($cart)) {
                             <th>Date</th>
                             <th>Items</th>
                             <th>Total</th>
-                            <th>Delivery Person</th>
+                            <th>Driver</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if($ontheway_orders_result && mysqli_num_rows($ontheway_orders_result) > 0): 
+                        <?php if($ontheway_orders_result && mysqli_num_rows($ontheway_orders_result) > 0):
                             mysqli_data_seek($ontheway_orders_result, 0);
-                            while($order = mysqli_fetch_assoc($ontheway_orders_result)): 
+                            while($order = mysqli_fetch_assoc($ontheway_orders_result)):
                                 $items_sql = "SELECT COUNT(*) as item_count FROM orderitem WHERE order_id = " . $order['order_id'];
                                 $items_result = mysqli_query($connection, $items_sql);
                                 $item_count = $items_result ? mysqli_fetch_assoc($items_result)['item_count'] : 0;
@@ -1198,12 +446,20 @@ if (!empty($cart)) {
                             <td><?php echo $item_count; ?> items</td>
                             <td>$<?php echo number_format($order['total_amount'], 2); ?></td>
                             <td>
-                                <small>Order is on the way</small>
+                                <span class="status-badge status-ontheway">On the way</span>
+                                <?php if (!empty($order['delivery_person_name'])): ?>
+                                    <br><small class="text-muted"><?php echo htmlspecialchars($order['delivery_person_name']); ?></small>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="viewOrder(<?php echo $order['order_id']; ?>)">
+                                    <i class="fas fa-location-arrow"></i> Track order
+                                </button>
                             </td>
                         </tr>
                         <?php endwhile; else: ?>
                         <tr>
-                            <td colspan="5" class="text-center" style="padding: 40px;">
+                            <td colspan="6" class="text-center" style="padding: 40px;">
                                 <i class="fas fa-shipping-fast" style="font-size: 2rem; color: #ccc; margin-bottom: 10px;"></i>
                                 <p>No orders on the way</p>
                             </td>
@@ -1270,6 +526,10 @@ if (!empty($cart)) {
 
         <!-- Tab: Order Food -->
         <div id="menu-tab" class="tab-content">
+            <div class="table-header kaah-menu-hint">
+                <h3><i class="fas fa-store"></i> Order now — pick items &amp; checkout</h3>
+                <p class="text-muted">Tap <strong>Add to cart</strong>, then open your cart to place the order.</p>
+            </div>
             <div class="menu-grid">
                 <?php if($menu_result && mysqli_num_rows($menu_result) > 0): ?>
                     <?php while($item = mysqli_fetch_assoc($menu_result)): ?>
@@ -1407,33 +667,22 @@ if (!empty($cart)) {
     <script>
         // Toggle sidebar on mobile
         function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('active');
+            document.body.classList.toggle('sidebar-open');
         }
-        
+
         // Show/hide tabs
         function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
             });
-            
-            // Show selected tab
             const tab = document.getElementById(tabName + '-tab');
             if (tab) {
                 tab.classList.add('active');
             }
-            
-            // Update active tab button
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
+                btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
             });
-            
-            event.currentTarget.classList.add('active');
-            
-            // Close sidebar on mobile
-            if (window.innerWidth <= 768) {
-                document.querySelector('.sidebar').classList.remove('active');
-            }
+            document.body.classList.remove('sidebar-open');
         }
         
         // Cart functionality

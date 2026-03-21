@@ -1,0 +1,452 @@
+/* Kaah Fast Food — Delivery Dashboard (2025) — pairs with customer theme */
+:root {
+  --kd-bg: #f0fdfa;
+  --kd-surface: #ffffff;
+  --kd-ink: #0f172a;
+  --kd-muted: #64748b;
+  --kd-accent: #0d9488;
+  --kd-accent-d: #0f766e;
+  --kd-line: #ccfbf1;
+  --kd-sidebar: #042f2e;
+  --kd-sidebar2: #134e4a;
+  --kd-warn: #d97706;
+  --kd-success: #059669;
+  --kd-danger: #dc2626;
+  --kd-radius: 16px;
+  --kd-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  --kd-font: "Inter", "Segoe UI", system-ui, sans-serif;
+  --kd-sidebar-w: 280px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body.kaah-delivery {
+  margin: 0;
+  font-family: var(--kd-font);
+  background: var(--kd-bg);
+  color: var(--kd-ink);
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+.kaah-delivery .dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.kaah-delivery .sidebar {
+  width: var(--kd-sidebar-w);
+  background: linear-gradient(180deg, var(--kd-sidebar) 0%, var(--kd-sidebar2) 100%);
+  color: #e2e8f0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 100;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+.kaah-delivery .kaah-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.kaah-delivery .kaah-brand__logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--kd-accent), #2dd4bf);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 1.15rem;
+}
+.kaah-delivery .kaah-brand__text strong {
+  display: block;
+  font-size: 1.05rem;
+  color: #fff;
+}
+.kaah-delivery .kaah-brand__text span {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-top: 2px;
+  display: block;
+}
+
+.kaah-delivery .sidebar-header { display: none; }
+
+.kaah-delivery .user-info {
+  padding: 12px 18px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.kaah-delivery .user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  margin: 0;
+}
+.kaah-delivery .user-info h3 { margin: 0; font-size: 0.95rem; color: #fff; }
+.kaah-delivery .user-info p { margin: 2px 0 0; font-size: 0.8rem; color: #94a3b8; }
+
+.kaah-delivery .sidebar-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 12px 0 24px;
+}
+.kaah-delivery .sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 4px 10px;
+  border-radius: 12px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s, color 0.2s;
+}
+.kaah-delivery .sidebar-nav a:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+.kaah-delivery .sidebar-nav li.active a {
+  background: rgba(13, 148, 136, 0.25);
+  color: #fff;
+  box-shadow: inset 3px 0 0 var(--kd-accent);
+}
+.kaah-delivery .sidebar-nav i { width: 1.25rem; text-align: center; }
+
+.kaah-delivery .user-role { display: none; }
+
+/* Main */
+.kaah-delivery .main-content {
+  flex: 1;
+  margin-left: var(--kd-sidebar-w);
+  padding: 0;
+  min-height: 100vh;
+}
+
+.kaah-delivery .dashboard-header {
+  background: var(--kd-surface);
+  padding: 22px 28px;
+  border-bottom: 1px solid #99f6e4;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+.kaah-delivery .header-left h1 {
+  margin: 0 0 6px;
+  font-size: clamp(1.35rem, 2.5vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.kaah-delivery .header-left p { margin: 0; color: var(--kd-muted); font-size: 0.92rem; }
+.kaah-delivery .header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.kaah-delivery .current-date,
+.kaah-delivery .current-time {
+  background: #ecfeff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--kd-accent-d);
+  border: 1px solid #99f6e4;
+}
+
+/* Alerts */
+.kaah-delivery .alert {
+  margin: 20px 28px 0;
+  padding: 14px 18px;
+  border-radius: var(--kd-radius);
+  font-size: 0.92rem;
+}
+.kaah-delivery .alert-success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+.kaah-delivery .alert-danger {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+/* Stats */
+.kaah-delivery .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 22px 28px 8px;
+}
+.kaah-delivery .stat-card {
+  background: var(--kd-surface);
+  border-radius: var(--kd-radius);
+  padding: 18px;
+  border: 1px solid #99f6e4;
+  box-shadow: var(--kd-shadow);
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.kaah-delivery .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 48px rgba(13, 148, 136, 0.12);
+}
+.kaah-delivery .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.kaah-delivery .stat-info h3 {
+  margin: 0 0 4px;
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+.kaah-delivery .stat-info p {
+  margin: 0;
+  color: var(--kd-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Sections */
+.kaah-delivery .section {
+  margin: 0 28px 28px;
+  background: var(--kd-surface);
+  border-radius: var(--kd-radius);
+  border: 1px solid #99f6e4;
+  box-shadow: var(--kd-shadow);
+  overflow: hidden;
+}
+.kaah-delivery .table-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid #ccfbf1;
+  background: linear-gradient(180deg, #f0fdfa 0%, #fff 100%);
+}
+.kaah-delivery .table-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+.kaah-delivery .table-header p {
+  margin: 0;
+  color: var(--kd-muted);
+  font-size: 0.88rem;
+}
+
+.kaah-delivery .orders-table {
+  overflow-x: auto;
+}
+.kaah-delivery table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+  font-size: 0.88rem;
+}
+.kaah-delivery th, .kaah-delivery td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #ccfbf1;
+}
+.kaah-delivery th {
+  background: #f0fdfa;
+  font-weight: 700;
+  color: var(--kd-muted);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+.kaah-delivery tbody tr:hover { background: #f0fdfa; }
+
+.kaah-delivery .status-badge {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.kaah-delivery .status-assigned { background: #fffbeb; color: #b45309; }
+.kaah-delivery .status-picked { background: #e0f2fe; color: #0369a1; }
+.kaah-delivery .status-ontheway { background: #d1fae5; color: #065f46; }
+.kaah-delivery .status-delivered { background: #ccfbf1; color: #0f766e; }
+
+/* Buttons */
+.kaah-delivery .btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: transform 0.15s, filter 0.2s;
+}
+.kaah-delivery .btn:hover { transform: translateY(-1px); }
+.kaah-delivery .btn-primary {
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+  color: #fff;
+}
+.kaah-delivery .btn-success { background: var(--kd-success); color: #fff; }
+.kaah-delivery .btn-warning { background: var(--kd-warn); color: #fff; }
+.kaah-delivery .btn-secondary {
+  background: #f1f5f9;
+  color: var(--kd-ink);
+  border: 1px solid #e2e8f0;
+}
+.kaah-delivery .btn-sm { padding: 6px 11px; font-size: 0.75rem; border-radius: 8px; }
+
+.kaah-delivery .action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Empty */
+.kaah-delivery .kd-empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--kd-muted);
+}
+.kaah-delivery .kd-empty i {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.35;
+  color: var(--kd-accent);
+}
+.kaah-delivery .kd-empty h3 {
+  margin: 0 0 8px;
+  color: var(--kd-ink);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+.kaah-delivery .kd-empty p { margin: 0; font-size: 0.92rem; }
+
+/* Modals */
+.kaah-delivery .modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.kaah-delivery .modal-content {
+  background: var(--kd-surface);
+  border-radius: 20px;
+  padding: 0;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid #99f6e4;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+  position: relative;
+}
+.kaah-delivery .modal-content > h2,
+.kaah-delivery .modal-content > p {
+  padding: 0 24px;
+}
+.kaah-delivery .modal-content > h2 {
+  padding-top: 24px;
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+.kaah-delivery .modal-content > p { margin: 0 0 16px; color: var(--kd-muted); }
+
+.kaah-delivery .close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--kd-muted);
+  line-height: 1;
+  z-index: 2;
+}
+
+.kaah-delivery .form-group { margin-bottom: 16px; padding: 0 24px; }
+.kaah-delivery .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.kaah-delivery .form-control {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #99f6e4;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+.kaah-delivery .form-control:focus {
+  outline: none;
+  border-color: var(--kd-accent);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+}
+
+.kaah-delivery #orderDetailsContent {
+  padding: 0 24px 24px;
+}
+
+.kaah-delivery #completeDeliveryForm {
+  padding: 0 0 24px;
+}
+.kaah-delivery .form-actions {
+  padding: 0 24px;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .kaah-delivery .sidebar {
+    width: 100%;
+    position: relative;
+    height: auto;
+  }
+  .kaah-delivery .main-content {
+    margin-left: 0 !important;
+  }
+  .kaah-delivery .stats-grid,
+  .kaah-delivery .section,
+  .kaah-delivery .alert { margin-left: 16px; margin-right: 16px; }
+  .kaah-delivery .dashboard-header { padding-left: 20px; padding-right: 20px; }
+}
