@@ -37,6 +37,14 @@
 | `php/signup.php` | Explicit `is_active` |
 | `php/setup.php` | `user.is_active` in DDL + ALTER + admin insert |
 
+## Missing `address` table (place order error)
+
+If you see **Table 'kaah.address' doesn't exist**, your DB was created before `address` was added.
+
+1. **Recommended:** open in browser: `php/ensure_database_schema.php` (creates `address` and patches missing columns).
+2. Or import `sql/ensure_address_table.sql` in phpMyAdmin.
+3. Fresh installs: run `php/setup.php` — it now mirrors `schema.sql` (including `address`).
+
 ## Recommended manual check (existing databases)
 
 If you already have bad `delivery.status` values, inspect and correct in phpMyAdmin:

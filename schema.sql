@@ -37,8 +37,7 @@ CREATE TABLE `menuitem` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`item_id`),
   KEY `idx_menuitem_available` (`is_available`),
-  KEY `idx_menuitem_category` (`category`),
-  CONSTRAINT `chk_menuitem_price_nonnegative` CHECK (`price` >= 0)
+  KEY `idx_menuitem_category` (`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `orders` (
@@ -55,15 +54,13 @@ CREATE TABLE `orders` (
   CONSTRAINT `fk_orders_user` FOREIGN KEY (`user_id`)
     REFERENCES `user` (`user_id`)
     ON UPDATE CASCADE
-    ON DELETE RESTRICT,
-  CONSTRAINT `chk_orders_total_nonnegative` CHECK (`total_amount` >= 0)
+    ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `orderitem` (
   `order_item_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `order_id` INT UNSIGNED NOT NULL,
   `menu_item_id` INT UNSIGNED NOT NULL,
-  `item_id` INT AS (`menu_item_id`) STORED,
   `quantity` INT UNSIGNED NOT NULL,
   `price` DECIMAL(10,2) NOT NULL,
   PRIMARY KEY (`order_item_id`),
@@ -76,9 +73,7 @@ CREATE TABLE `orderitem` (
   CONSTRAINT `fk_orderitem_menuitem` FOREIGN KEY (`menu_item_id`)
     REFERENCES `menuitem` (`item_id`)
     ON UPDATE CASCADE
-    ON DELETE RESTRICT,
-  CONSTRAINT `chk_orderitem_quantity_positive` CHECK (`quantity` > 0),
-  CONSTRAINT `chk_orderitem_price_nonnegative` CHECK (`price` >= 0)
+    ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `address` (

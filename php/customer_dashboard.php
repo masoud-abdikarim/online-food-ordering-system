@@ -1004,6 +1004,19 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
             updateCartDisplay();
             showTab('orders');
         });
+
+        // Soft refresh while viewing active order tabs (tracks status updates ~every 35s)
+        (function orderStatusPolling() {
+            const TRACK_TABS = ['pending', 'preparing', 'ontheway'];
+            const INTERVAL_MS = 35000;
+            setInterval(function () {
+                if (document.visibilityState !== 'visible') return;
+                const active = document.querySelector('.tab-btn.active')?.getAttribute('data-tab');
+                if (active && TRACK_TABS.includes(active)) {
+                    location.reload();
+                }
+            }, INTERVAL_MS);
+        })();
     </script>
 </body>
 </html>

@@ -215,51 +215,125 @@ if (isset($_POST['delete_menu_item'])) {
     }
 }
 
-// Handle order approval/rejection
+// Handle order approval/rejection (only while Pending)
 if (isset($_POST['approve_order'])) {
     $order_id = intval($_POST['order_id']);
     $action = mysqli_real_escape_string($connection, $_POST['action']);
-    
-    if ($action == 'approve') {
+    $st_res = mysqli_query($connection, "SELECT status FROM orders WHERE order_id = $order_id");
+    $st_row = $st_res ? mysqli_fetch_assoc($st_res) : null;
+    if (!$st_row || $st_row['status'] !== 'Pending') {
+        $error = 'Only pending orders can be approved or rejected.';
+    } elseif ($action == 'approve') {
         $sql = "UPDATE orders SET status = 'Preparing' WHERE order_id = $order_id";
-        $message = "Order approved and moved to preparation!";
+        if (mysqli_query($connection, $sql)) {
+            $message = 'Order approved and moved to preparation!';
+        } else {
+            $error = mysqli_error($connection);
+        }
     } else {
         $sql = "UPDATE orders SET status = 'Rejected' WHERE order_id = $order_id";
-        $message = "Order rejected!";
+        if (mysqli_query($connection, $sql)) {
+            mysqli_query($connection, "DELETE FROM delivery WHERE order_id = $order_id");
+            $message = 'Order rejected!';
+        } else {
+            $error = mysqli_error($connection);
+        }
     }
-    
-    mysqli_query($connection, $sql);
 }
 
-// Handle delivery assignment
+// Admin: update order status (full lifecycle)
+if (isset($_POST['admin_update_order_status'])) {
+    $order_id = intval($_POST['order_id']);
+    $new_status = isset($_POST['new_status']) ? mysqli_real_escape_string($connection, $_POST['new_status']) : '';
+    $allowed = ['Pending', 'Preparing', 'On the way', 'Delivered', 'Rejected'];
+    if (!in_array($new_status, $allowed, true)) {
+        $error = 'Invalid order status.';
+    } else {
+        mysqli_begin_transaction($connection);
+        $ok = mysqli_query($connection, "UPDATE orders SET status = '$new_status' WHERE order_id = $order_id");
+        if (!$ok) {
+            mysqli_rollback($connection);
+            $error = mysqli_error($connection);
+        } else {
+            if ($new_status === 'Delivered') {
+                mysqli_query($connection, "UPDATE delivery SET status = 'Delivered', delivered_at = COALESCE(delivered_at, NOW()) WHERE order_id = $order_id");
+                mysqli_query($connection, "UPDATE orders SET payment_status = 'Paid' WHERE order_id = $order_id");
+            } elseif ($new_status === 'On the way') {
+                mysqli_query($connection, "UPDATE delivery SET status = 'On the way' WHERE order_id = $order_id AND status IN ('Assigned','Picked Up')");
+            } elseif ($new_status === 'Rejected') {
+                mysqli_query($connection, "DELETE FROM delivery WHERE order_id = $order_id");
+            }
+            mysqli_commit($connection);
+            $message = 'Order status updated.';
+        }
+    }
+}
+
+// Handle delivery assignment (first assignment)
 if (isset($_POST['assign_delivery'])) {
     $order_id = intval($_POST['order_id']);
     $delivery_person_id = intval($_POST['delivery_person_id']);
-    
-    // Prevent assigning a busy delivery person
-    $busy_sql = "SELECT COUNT(*) AS cnt FROM delivery 
-                 WHERE delivery_person_id = $delivery_person_id 
-                 AND status IN ('Assigned','Picked Up','On the way')";
-    $busy_res = mysqli_query($connection, $busy_sql);
-    $busy_row = $busy_res ? mysqli_fetch_assoc($busy_res) : ['cnt' => 0];
-    if (intval($busy_row['cnt']) > 0) {
-        $error = "Selected delivery person is currently busy";
+    if ($delivery_person_id <= 0) {
+        $error = 'Please select a delivery person.';
     } else {
-        // Check if delivery already exists
-        $check_sql = "SELECT * FROM delivery WHERE order_id = $order_id";
-        $check_result = mysqli_query($connection, $check_sql);
-        
-        if (mysqli_num_rows($check_result) == 0) {
-            $sql = "INSERT INTO delivery (order_id, delivery_person_id, status) 
-                    VALUES ($order_id, $delivery_person_id, 'Assigned')";
-            
-            if (mysqli_query($connection, $sql)) {
-                $message = "Delivery assigned successfully!";
-            } else {
-                $error = "Error: " . mysqli_error($connection);
-            }
+        $busy_sql = "SELECT COUNT(*) AS cnt FROM delivery 
+                     WHERE delivery_person_id = $delivery_person_id 
+                     AND status IN ('Assigned','Picked Up','On the way')
+                     AND order_id != $order_id";
+        $busy_res = mysqli_query($connection, $busy_sql);
+        $busy_row = $busy_res ? mysqli_fetch_assoc($busy_res) : ['cnt' => 0];
+        if (intval($busy_row['cnt']) > 0) {
+            $error = 'Selected delivery person is currently busy with another order.';
         } else {
-            $error = "Delivery already assigned to this order!";
+            $check_sql = "SELECT delivery_id FROM delivery WHERE order_id = $order_id";
+            $check_result = mysqli_query($connection, $check_sql);
+            if (mysqli_num_rows($check_result) == 0) {
+                $sql = "INSERT INTO delivery (order_id, delivery_person_id, status) 
+                        VALUES ($order_id, $delivery_person_id, 'Assigned')";
+                if (mysqli_query($connection, $sql)) {
+                    $message = 'Delivery assigned successfully!';
+                } else {
+                    $error = 'Error: ' . mysqli_error($connection);
+                }
+            } else {
+                $error = 'Delivery already exists — use Reassign on the order list.';
+            }
+        }
+    }
+}
+
+// Reassign delivery person (active deliveries only)
+if (isset($_POST['reassign_delivery'])) {
+    $order_id = intval($_POST['order_id']);
+    $delivery_person_id = intval($_POST['delivery_person_id']);
+    if ($delivery_person_id <= 0) {
+        $error = 'Please select a delivery person.';
+    } else {
+        $dres = mysqli_query($connection, "SELECT * FROM delivery WHERE order_id = $order_id");
+        $d = $dres ? mysqli_fetch_assoc($dres) : null;
+        if (!$d) {
+            $error = 'No delivery record for this order — assign first.';
+        } elseif ($d['status'] === 'Delivered') {
+            $error = 'Cannot reassign a completed delivery.';
+        } else {
+            $busy_sql = "SELECT COUNT(*) AS cnt FROM delivery 
+                         WHERE delivery_person_id = $delivery_person_id 
+                         AND status IN ('Assigned','Picked Up','On the way')
+                         AND order_id != $order_id";
+            $busy_res = mysqli_query($connection, $busy_sql);
+            $busy_row = $busy_res ? mysqli_fetch_assoc($busy_res) : ['cnt' => 0];
+            if (intval($busy_row['cnt']) > 0) {
+                $error = 'Selected delivery person is currently busy with another order.';
+            } else {
+                $did = intval($d['delivery_id']);
+                $sql = "UPDATE delivery SET delivery_person_id = $delivery_person_id, status = 'Assigned', 
+                        assigned_at = NOW(), delivered_at = NULL WHERE delivery_id = $did";
+                if (mysqli_query($connection, $sql)) {
+                    $message = 'Delivery reassigned.';
+                } else {
+                    $error = mysqli_error($connection);
+                }
+            }
         }
     }
 }
@@ -390,7 +464,9 @@ $categories_result = mysqli_query($connection, $categories_sql);
 // Get all orders with delivery info
 $all_orders_sql = "SELECT o.*, 
                           u.name as customer_name, 
+                          d.delivery_id,
                           d.status as delivery_status, 
+                          u2.user_id AS delivery_person_id,
                           u2.name as delivery_person_name 
                    FROM orders o 
                    JOIN user u ON o.user_id = u.user_id 
@@ -854,6 +930,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                 <table class="orders-table">
                     <thead>
                         <tr>
+                            <th>Order #</th>
                             <th>Customer</th>
                             <th>Date</th>
                             <th>Amount</th>
@@ -865,6 +942,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                         <?php if($pending_orders_result && mysqli_num_rows($pending_orders_result) > 0): ?>
                             <?php while($order = mysqli_fetch_assoc($pending_orders_result)): ?>
                             <tr>
+                                <td><strong>#<?php echo (int)$order['order_id']; ?></strong></td>
                                 <td><?php echo htmlspecialchars($order['customer_name']); ?></td>
                                 <td><?php echo date('M d, Y H:i', strtotime($order['order_date'])); ?></td>
                                 <td><strong>$<?php echo number_format($order['total_amount'], 2); ?></strong></td>
@@ -874,6 +952,9 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                                     </span>
                                 </td>
                                 <td class="action-buttons">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAdminOrderDetail(<?php echo (int)$order['order_id']; ?>)">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="order_id" value="<?php echo $order['order_id']; ?>">
                                         <input type="hidden" name="action" value="approve">
@@ -893,7 +974,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="5" class="text-center">No pending orders</td>
+                                <td colspan="6" class="text-center">No pending orders</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -1014,6 +1095,9 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                 </span>
             </div>
             <div class="table-responsive">
+                <p class="text-muted" style="margin-bottom:12px;font-size:0.9rem;">
+                    Approve pending orders in <strong>Approvals</strong>, assign a driver when status is <strong>Preparing</strong>, or update status / reassign here.
+                </p>
                 <table class="orders-table">
                     <thead>
                         <tr>
@@ -1021,48 +1105,116 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                             <th>Customer</th>
                             <th>Date</th>
                             <th>Amount</th>
-                            <th>Status</th>
-                            <th>Payment</th>
+                            <th>Order</th>
+                            <th>Pay</th>
+                            <th>Driver / delivery</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if($all_orders_result && mysqli_num_rows($all_orders_result) > 0): ?>
-                            <?php while($order = mysqli_fetch_assoc($all_orders_result)): ?>
+                            <?php 
+                            mysqli_data_seek($all_orders_result, 0);
+                            while($order = mysqli_fetch_assoc($all_orders_result)): 
+                                $oid = (int)$order['order_id'];
+                                $dst = $order['delivery_status'] ?? '';
+                                $dpid = isset($order['delivery_person_id']) ? (int)$order['delivery_person_id'] : 0;
+                                $del_done = ($dst === 'Delivered');
+                            ?>
                             <tr>
-                                <td><?php echo $order['order_id']; ?></td>
+                                <td><strong>#<?php echo $oid; ?></strong></td>
                                 <td><?php echo htmlspecialchars($order['customer_name']); ?></td>
                                 <td><?php echo date('M d, Y H:i', strtotime($order['order_date'])); ?></td>
                                 <td><strong>$<?php echo number_format($order['total_amount'], 2); ?></strong></td>
                                 <td>
                                     <span class="status-badge status-<?php echo strtolower(str_replace(' ', '-', $order['status'])); ?>">
-                                        <?php echo $order['status']; ?>
+                                        <?php echo htmlspecialchars($order['status']); ?>
                                     </span>
                                 </td>
                                 <td>
                                     <span class="status-badge status-<?php echo strtolower($order['payment_status']); ?>">
-                                        <?php echo $order['payment_status']; ?>
+                                        <?php echo htmlspecialchars($order['payment_status']); ?>
                                     </span>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td colspan="6" style="background:#fafafa">
-                                    <div style="display:flex; gap:20px; align-items:center;">
-                                        <div><strong>Delivery:</strong> <?php echo htmlspecialchars($order['delivery_person_name'] ?: 'Not assigned'); ?></div>
-                                        <?php if($order['delivery_status']): ?>
-                                            <div>
-                                                <strong>Status:</strong> 
-                                                <span class="status-badge status-<?php echo strtolower(str_replace(' ', '-', $order['delivery_status'])); ?>">
-                                                    <?php echo $order['delivery_status']; ?>
-                                                </span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
+                                <td style="font-size:0.88rem;">
+                                    <div><strong><?php echo htmlspecialchars($order['delivery_person_name'] ?: '—'); ?></strong></div>
+                                    <?php if ($dst): ?>
+                                        <span class="status-badge status-<?php echo strtolower(str_replace(' ', '-', $dst)); ?>">
+                                            <?php echo htmlspecialchars($dst); ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="text-muted">No driver</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td style="min-width:200px;">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="openAdminOrderDetail(<?php echo $oid; ?>)" style="margin-bottom:6px;">
+                                        <i class="fas fa-eye"></i> Details
+                                    </button>
+                                    <form method="POST" style="margin-bottom:8px;">
+                                        <input type="hidden" name="order_id" value="<?php echo $oid; ?>">
+                                        <select name="new_status" class="form-control" style="padding:6px;font-size:0.85rem;margin-bottom:4px;">
+                                            <?php foreach (['Pending','Preparing','On the way','Delivered','Rejected'] as $st): ?>
+                                            <option value="<?php echo htmlspecialchars($st); ?>" <?php echo ($order['status'] === $st) ? 'selected' : ''; ?>><?php echo htmlspecialchars($st); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <button type="submit" name="admin_update_order_status" class="btn btn-primary btn-sm" style="width:100%;">
+                                            <i class="fas fa-sync"></i> Update status
+                                        </button>
+                                    </form>
+                                    <?php if ($order['status'] === 'Preparing' && !$dst): ?>
+                                    <form method="POST">
+                                        <input type="hidden" name="order_id" value="<?php echo $oid; ?>">
+                                        <select name="delivery_person_id" required class="form-control" style="padding:6px;font-size:0.85rem;margin-bottom:4px;">
+                                            <option value="">Assign driver…</option>
+                                            <?php
+                                            if ($delivery_personnel_result) {
+                                                mysqli_data_seek($delivery_personnel_result, 0);
+                                                while ($dp = mysqli_fetch_assoc($delivery_personnel_result)):
+                                                    $busy = (int)($dp['active_deliveries'] ?? 0) > 0;
+                                            ?>
+                                            <option value="<?php echo (int)$dp['user_id']; ?>" <?php echo $busy ? 'disabled' : ''; ?>>
+                                                <?php echo htmlspecialchars($dp['name']); ?><?php echo $busy ? ' (busy)' : ''; ?>
+                                            </option>
+                                            <?php 
+                                                endwhile;
+                                            }
+                                            ?>
+                                        </select>
+                                        <button type="submit" name="assign_delivery" class="btn btn-success btn-sm" style="width:100%;">
+                                            <i class="fas fa-motorcycle"></i> Assign
+                                        </button>
+                                    </form>
+                                    <?php elseif ($dst && !$del_done): ?>
+                                    <form method="POST">
+                                        <input type="hidden" name="order_id" value="<?php echo $oid; ?>">
+                                        <select name="delivery_person_id" required class="form-control" style="padding:6px;font-size:0.85rem;margin-bottom:4px;">
+                                            <?php
+                                            if ($delivery_personnel_result) {
+                                                mysqli_data_seek($delivery_personnel_result, 0);
+                                                while ($dp = mysqli_fetch_assoc($delivery_personnel_result)):
+                                                    $uid = (int)$dp['user_id'];
+                                                    $busy = (int)($dp['active_deliveries'] ?? 0) > 0;
+                                                    $is_here = ($dpid > 0 && $uid === $dpid);
+                                            ?>
+                                            <option value="<?php echo $uid; ?>" <?php echo ($dpid === $uid) ? 'selected' : ''; ?> <?php echo ($busy && !$is_here) ? 'disabled' : ''; ?>>
+                                                <?php echo htmlspecialchars($dp['name']); ?><?php echo ($busy && !$is_here) ? ' (busy)' : ''; ?>
+                                            </option>
+                                            <?php 
+                                                endwhile;
+                                            }
+                                            ?>
+                                        </select>
+                                        <button type="submit" name="reassign_delivery" class="btn btn-warning btn-sm" style="width:100%;">
+                                            <i class="fas fa-user-friends"></i> Reassign
+                                        </button>
+                                    </form>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" class="text-center">No orders found</td>
+                                <td colspan="8" class="text-center">No orders found</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -1188,6 +1340,19 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
     </main>
 
     <!-- Modals -->
+    <!-- Admin: full order detail (AJAX) -->
+    <div id="adminOrderDetailModal" class="modal">
+        <div class="modal-content" style="max-width:720px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-receipt"></i> Order details</h2>
+                <button type="button" class="modal-close" onclick="closeModal('adminOrderDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="adminOrderDetailBody">
+                <p class="text-muted">Loading…</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Menu Item Modal -->
     <div id="addMenuModal" class="modal">
         <div class="modal-content">
@@ -1506,6 +1671,26 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
         
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+        }
+
+        /** Load full order HTML for admin (items, customer, address). */
+        function openAdminOrderDetail(orderId) {
+            const body = document.getElementById('adminOrderDetailBody');
+            if (!body) return;
+            body.innerHTML = '<p class="text-muted">Loading…</p>';
+            openModal('adminOrderDetailModal');
+            fetch('get_order_details_admin.php?order_id=' + encodeURIComponent(orderId))
+                .then(r => {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.text();
+                })
+                .then(html => {
+                    body.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error(err);
+                    body.innerHTML = '<p class="text-danger">Could not load order details.</p>';
+                });
         }
         
         function showAddMenuModal() {
