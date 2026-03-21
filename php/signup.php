@@ -5,17 +5,19 @@ $errors = [];
 $old_data = [];
 if (isset($_POST['submit'])) {
     $name = mysqli_real_escape_string($connection, $_POST['name']);
-    $phone = mysqli_real_escape_string($connection, $_POST['phone']);
+    $phone_raw = $_POST['phone'] ?? '';
+    $phone_digits = preg_replace('/\D+/', '', $phone_raw);
+    $phone = mysqli_real_escape_string($connection, $phone_digits);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     $terms = isset($_POST['terms']);
     $user_type = 'Customer';
     if (empty($name) || empty($phone) || empty($password) || empty($confirm_password)) { $errors[] = "All fields are required"; }
-    if (!preg_match('/^[0-9]{10,15}$/', $phone)) { $errors[] = "Please enter a valid phone number (10-15 digits)"; }
+    if (!preg_match('/^[0-9]{6,10}$/', $phone_digits)) { $errors[] = "Please enter a valid phone number (6-10 digits)"; }
     if ($password !== $confirm_password) { $errors[] = "Passwords do not match"; }
     if (strlen($password) < 6) { $errors[] = "Password must be at least 6 characters long"; }
     if (!$terms) { $errors[] = "You must agree to the Terms of Service and Privacy Policy"; }
-    $old_data = ['name' => $name, 'phone' => $phone];
+    $old_data = ['name' => $name, 'phone' => $phone_digits];
     if (empty($errors)) {
         $check_sql = "SELECT user_id FROM user WHERE phone = '$phone'";
         $check_res = mysqli_query($connection, $check_sql);
@@ -49,7 +51,7 @@ if (isset($_POST['submit'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Ateye albailk</title>
+    <title>Sign Up - Kaah Fast Food</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -116,7 +118,7 @@ if (isset($_POST['submit'])) {
                     </a>
                     <div class="logo">
                         <i class="fas fa-utensils"></i>
-                        <h1>Ateye albailk</h1>
+                        <h1>Kaah Fast Food</h1>
                     </div>
                     <h2>Create Your Account</h2>
                     <p>Join our food community today</p>
@@ -152,6 +154,9 @@ if (isset($_POST['submit'])) {
                         <input type="tel" id="phone" name="phone" 
                                placeholder="Enter your phone number" 
                                value="<?php echo isset($old_data['phone']) ? htmlspecialchars($old_data['phone']) : ''; ?>" 
+                               pattern="[0-9]{6,10}"
+                               minlength="6"
+                               maxlength="10"
                                required>
                         <small class="hint">We'll use this for login and notifications</small>
                     </div>

@@ -80,7 +80,7 @@ $admin_phone = "0000000000";
 $check_admin = mysqli_query($connection, "SELECT * FROM user WHERE phone = '$admin_phone'");
 if (mysqli_num_rows($check_admin) == 0) {
     $admin_pass = password_hash("admin123", PASSWORD_DEFAULT);
-    $admin_sql = "INSERT INTO user (name, phone, password, user_type) VALUES ('System Admin', '$admin_phone', '$admin_pass', 'Admin')";
+    $admin_sql = "INSERT INTO user (name, phone, password, user_type) VALUES ('Kaah Fast Food Admin', '$admin_phone', '$admin_pass', 'Admin')";
     if (mysqli_query($connection, $admin_sql)) {
         echo "<p style='color: green;'>Default admin created (Phone: $admin_phone, Pass: admin123)</p>";
     } else {
@@ -95,7 +95,7 @@ $check_menu = mysqli_query($connection, "SELECT * FROM menuitem");
 if (mysqli_num_rows($check_menu) == 0) {
     $items = [
         ['Traditional Chicken Platter', 'Succulent chicken marinated in traditional spices', 5.99, 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'],
-        ['Suqaar Special', 'Authentic Somali suqaar - tender beef cubes', 4.99, 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'],
+        ['Suqaar Special', 'Signature suqaar from New Hargeisa - tender beef cubes', 4.99, 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'],
         ['Grilled Red Snapper', 'Fresh red snapper marinated in lemon herb sauce', 4.99, 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80']
     ];
     

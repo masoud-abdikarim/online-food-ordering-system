@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ateye albailk - Premium Food Delivery</title>
+    <title>Kaah Fast Food - Premium Food Delivery</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,7 +20,7 @@
         <div class="container">
             <div class="navbar">
                 <div class="logo">
-                    <h1><i class="fas fa-utensils"></i> Ateye albailk</h1>
+                    <h1><i class="fas fa-utensils"></i> Kaah Fast Food</h1>
                     <span class="tagline">Taste the Tradition</span>
                 </div>
                 <nav class="nav-menu">
@@ -183,7 +183,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3><i class="fas fa-utensils"></i> Ateye albailk</h3>
+                    <h3><i class="fas fa-utensils"></i> Kaah Fast Food</h3>
                     <p>Serving authentic traditional cuisine with modern excellence since 2019.</p>
                 </div>
                 <div class="footer-section">
@@ -199,12 +199,13 @@
                     <h4>Contact Info</h4>
                     <ul>
                         <li><i class="fas fa-phone"></i>+25259875</li>
-                        <li><i class="fas fa-envelope"></i> info@ateyealbailk.com</li>
+                        <li><i class="fas fa-envelope"></i> info@kaahfastfood.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> New Hargeisa</li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Ateye albailk. All rights reserved.</p>
+                <p>&copy; 2025 Kaah Fast Food. All rights reserved.</p>
             </div>
         </div>
     </footer>

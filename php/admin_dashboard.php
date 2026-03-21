@@ -23,7 +23,7 @@ $error = '';
 // 1. CREATE USER (Admin/Delivery/Customer)
 if (isset($_POST['create_user'])) {
     $name = mysqli_real_escape_string($connection, $_POST['name']);
-    $phone = mysqli_real_escape_string($connection, $_POST['phone']);
+    $phone = mysqli_real_escape_string($connection, preg_replace('/\D+/', '', $_POST['phone'] ?? ''));
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     $user_type = mysqli_real_escape_string($connection, $_POST['user_type']);
@@ -36,8 +36,8 @@ if (isset($_POST['create_user'])) {
         $errors[] = "All fields are required";
     }
     
-    if(!empty($phone) && !preg_match('/^[0-9]{10,15}$/', $phone)){
-        $errors[] = "Please enter a valid phone number (10-15 digits)";
+    if(!empty($phone) && !preg_match('/^[0-9]{6,10}$/', $phone)){
+        $errors[] = "Please enter a valid phone number (6-10 digits)";
     }
     
     if(!empty($password) && !empty($confirm_password) && $password !== $confirm_password){
@@ -81,7 +81,7 @@ if (isset($_POST['create_user'])) {
 if (isset($_POST['update_user'])) {
     $user_id_update = intval($_POST['user_id']);
     $name = mysqli_real_escape_string($connection, $_POST['name']);
-    $phone = mysqli_real_escape_string($connection, $_POST['phone']);
+    $phone = mysqli_real_escape_string($connection, preg_replace('/\D+/', '', $_POST['phone'] ?? ''));
     $user_type = mysqli_real_escape_string($connection, $_POST['user_type']);
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     
@@ -416,7 +416,7 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Ateye albailk</title>
+    <title>Admin Dashboard - Kaah Fast Food</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -1084,7 +1084,7 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
     <!-- Fixed Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
-            <h2><i class="fas fa-utensils"></i> Ateye albailk</h2>
+            <h2><i class="fas fa-utensils"></i> Kaah Fast Food</h2>
             <span class="user-role">Admin Dashboard</span>
         </div>
         
@@ -1938,7 +1938,7 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
                     </div>
                     <div class="form-group">
                         <label>Phone Number *</label>
-                        <input type="tel" name="phone" class="form-control" required placeholder="10-15 digits">
+                        <input type="tel" name="phone" class="form-control" required placeholder="6-10 digits" pattern="[0-9]{6,10}" minlength="6" maxlength="10">
                     </div>
                     <div class="form-group">
                         <label>Password *</label>
@@ -1988,7 +1988,7 @@ $history_older_result = mysqli_query($connection, $history_older_sql);
                     </div>
                     <div class="form-group">
                         <label>Phone Number *</label>
-                        <input type="tel" name="phone" id="edit_user_phone" class="form-control" required>
+                        <input type="tel" name="phone" id="edit_user_phone" class="form-control" required pattern="[0-9]{6,10}" minlength="6" maxlength="10">
                     </div>
                     <div class="form-group">
                         <label>User Type *</label>

@@ -53,7 +53,7 @@ $delivery = mysqli_num_rows($delivery_result) > 0 ? mysqli_fetch_assoc($delivery
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Details - Ateye albailk</title>
+    <title>Order Details - Kaah Fast Food</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/order-details.css">
@@ -63,7 +63,7 @@ $delivery = mysqli_num_rows($delivery_result) > 0 ? mysqli_fetch_assoc($delivery
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-utensils"></i> Ateye albailk</h2>
+                <h2><i class="fas fa-utensils"></i> Kaah Fast Food</h2>
                 <span class="user-role">Order Details</span>
             </div>
             

@@ -17,8 +17,10 @@ if(isset($_SESSION['old_phone'])) {
 
 // Process login
 if(isset($_POST['submit'])){
-    $phone = mysqli_real_escape_string($connection, $_POST['phone']);
-    $password = $_POST['password'];
+    $phone_raw = $_POST['phone'] ?? '';
+    $phone_digits = preg_replace('/\D+/', '', $phone_raw);
+    $phone = mysqli_real_escape_string($connection, $phone_digits);
+    $password = $_POST['password'] ?? '';
     $remember = isset($_POST['remember']) ? true : false;
 
     if(empty($phone) || empty($password)){
@@ -36,8 +38,19 @@ if(isset($_POST['submit'])){
         } elseif(mysqli_num_rows($result) == 1){
             $user = mysqli_fetch_assoc($result);
             
-            // Verify password
-            if(password_verify($password, $user['password'])){
+            // Verify password (supports both hashed and legacy plain-text values)
+            $is_valid_password = password_verify($password, $user['password']);
+            if (!$is_valid_password && $password === $user['password']) {
+                $is_valid_password = true;
+                $new_hash = password_hash($password, PASSWORD_DEFAULT);
+                mysqli_query($connection, "UPDATE user SET password = '" . mysqli_real_escape_string($connection, $new_hash) . "' WHERE user_id = " . intval($user['user_id']));
+            }
+
+            if($is_valid_password){
+                if (isset($user['is_active']) && intval($user['is_active']) !== 1) {
+                    $errors[] = "Your account is inactive. Please contact admin.";
+                    $old_phone = $phone_digits;
+                } else {
                 // Set session variables
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['name'] = $user['name'];
@@ -65,13 +78,14 @@ if(isset($_POST['submit'])){
                         break;
                 }
                 exit();
+                }
             } else {
                 $errors[] = "Invalid password";
-                $old_phone = $phone;
+                $old_phone = $phone_digits;
             }
         } else {
             $errors[] = "Phone number not registered";
-            $old_phone = $phone;
+            $old_phone = $phone_digits;
         }
     }
 }
@@ -82,7 +96,7 @@ if(isset($_POST['submit'])){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Ateye albailk</title>
+    <title>Login - Kaah Fast Food</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -225,7 +239,7 @@ if(isset($_POST['submit'])){
                     </a>
                     <div class="logo">
                         <i class="fas fa-utensils"></i>
-                        <h1>Ateye albailk</h1>
+                        <h1>Kaah Fast Food</h1>
                     </div>
                     <h2>Welcome Back!</h2>
                     <p>Login to your account to continue</p>
@@ -251,6 +265,9 @@ if(isset($_POST['submit'])){
                         <input type="tel" id="phone" name="phone" 
                                placeholder="Enter your phone number" 
                                value="<?php echo htmlspecialchars($old_phone); ?>" 
+                               pattern="[0-9]{6,10}"
+                               minlength="6"
+                               maxlength="10"
                                required>
                     </div>
 

@@ -6,11 +6,13 @@ require_once('config.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = mysqli_real_escape_string($connection, $_POST['name']);
-    $phone = mysqli_real_escape_string($connection, $_POST['phone']);
+    $phone = mysqli_real_escape_string($connection, preg_replace('/\D+/', '', $_POST['phone'] ?? ''));
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     
-    if ($password !== $confirm_password) {
+    if (!preg_match('/^[0-9]{6,10}$/', $phone)) {
+        $error = "Please enter a valid phone number (6-10 digits)!";
+    } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match!";
     } elseif (strlen($password) < 6) {
         $error = "Password must be at least 6 characters long!";
@@ -88,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 <div class="form-group">
                     <label>Phone Number</label>
-                    <input type="tel" name="phone" required placeholder="Enter phone number">
+                    <input type="tel" name="phone" required placeholder="Enter phone number (6-10 digits)" pattern="[0-9]{6,10}" minlength="6" maxlength="10">
                 </div>
                 
                 <div class="form-group">

@@ -16,7 +16,7 @@ $user_name = $_SESSION['name'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Cart - Ateye albailk</title>
+    <title>My Cart - Kaah Fast Food</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/cart.css">
@@ -26,7 +26,7 @@ $user_name = $_SESSION['name'];
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-utensils"></i> Ateye albailk</h2>
+                <h2><i class="fas fa-utensils"></i> Kaah Fast Food</h2>
                 <span class="user-role">Shopping Cart</span>
             </div>
             

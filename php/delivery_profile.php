@@ -20,11 +20,11 @@ $user = get_user($connection, $user_id);
 
 if (isset($_POST['update_profile'])) {
     $name = mysqli_real_escape_string($connection, $_POST['name']);
-    $phone = mysqli_real_escape_string($connection, $_POST['phone']);
+    $phone = mysqli_real_escape_string($connection, preg_replace('/\D+/', '', $_POST['phone'] ?? ''));
 
     $errors = [];
     if (empty($name) || empty($phone)) { $errors[] = 'Name and phone are required'; }
-    if (!preg_match('/^[0-9]{10,15}$/', $phone)) { $errors[] = 'Enter a valid phone number (10-15 digits)'; }
+    if (!preg_match('/^[0-9]{6,10}$/', $phone)) { $errors[] = 'Enter a valid phone number (6-10 digits)'; }
 
     if (empty($errors)) {
         $check_sql = "SELECT user_id FROM user WHERE phone = '$phone' AND user_id != $user_id";
@@ -116,7 +116,7 @@ if (isset($_POST['change_password'])) {
                     </div>
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
-                        <input class="form-control" type="tel" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" required>
+                        <input class="form-control" type="tel" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" required pattern="[0-9]{6,10}" minlength="6" maxlength="10">
                     </div>
                     <button class="btn btn-primary" type="submit" name="update_profile"><i class="fas fa-save"></i> Save Changes</button>
                 </form>

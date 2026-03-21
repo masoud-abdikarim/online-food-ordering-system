@@ -180,7 +180,7 @@ if ($delivery_info_result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Dashboard - Ateye albailk</title>
+    <title>Delivery Dashboard - Kaah Fast Food</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -510,7 +510,7 @@ if ($delivery_info_result) {
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-motorcycle"></i> Ateye albailk</h2>
+                <h2><i class="fas fa-motorcycle"></i> Kaah Fast Food</h2>
                 <span class="user-role">Delivery Dashboard</span>
             </div>
             
