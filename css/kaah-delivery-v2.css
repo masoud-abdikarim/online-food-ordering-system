@@ -339,6 +339,11 @@ body.kaav2-delivery .btn-secondary {
   border: 1px solid var(--kd-line);
 }
 body.kaav2-delivery .btn-success { background: #22c55e; color: #fff; }
+body.kaav2-delivery .btn-warning {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #422006;
+  box-shadow: 0 4px 16px rgba(245,158,11,.35);
+}
 body.kaav2-delivery .btn-sm { padding: 7px 12px; font-size: .8rem; border-radius: 10px; }
 
 body.kaav2-delivery .kd-empty {

@@ -648,9 +648,18 @@ body.kaav2-customer .form-control {
 body.kaav2-customer .text-center { text-align: center; }
 body.kaav2-customer .text-muted { color: var(--kc-muted); font-size: .88rem; }
 
+/* Toast notifications (JS uses .notification-popup + slideIn) */
+@keyframes slideIn {
+  from { transform: translateX(120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
 /* Responsive */
-@media (max-width: 1024px) {
-  body.kaav2-customer .sidebar { transform: translateX(-100%); }
+@media (max-width: 900px) {
+  body.kaav2-customer .sidebar {
+    transform: translateX(-100%);
+    width: min(300px, 88vw);
+  }
   body.kaav2-customer.sidebar-open .sidebar { transform: translateX(0); }
   body.kaav2-customer .main-content { margin-left: 0 !important; }
   body.kaav2-customer .mobile-menu-toggle { display: flex; }

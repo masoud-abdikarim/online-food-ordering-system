@@ -19,6 +19,8 @@ body.kaav2-admin {
   --kaav2-card: #fff;
   --kaav2-muted: #64748b;
   --kaav2-line: #e2e8f0;
+  --kaav2-sidebar-w: 280px;
+  --kaav2-sidebar-w-collapsed: 88px;
 }
 
 body.kaav2-admin a { color: inherit; text-decoration: none; }
@@ -52,28 +54,45 @@ body.kaav2-admin .mobile-menu-toggle {
   justify-content: center;
 }
 body.kaav2-admin .sidebar-collapse-btn {
-  position: absolute;
-  top: 18px;
-  right: 12px;
-  width: 36px;
-  height: 36px;
+  display: none;
+  position: fixed;
+  left: calc(var(--kaav2-sidebar-w) - 14px);
+  top: 88px;
+  z-index: 102;
+  width: 32px;
+  height: 32px;
   border-radius: 10px;
-  border: 1px solid var(--kaav2-sidebar-line);
-  background: rgba(255,255,255,.06);
-  color: #94a3b8;
+  border: 1px solid var(--kaav2-line);
+  background: #fff;
+  color: #64748b;
   cursor: pointer;
-  display: flex;
   align-items: center;
   justify-content: center;
-  transition: background .2s, color .2s;
+  box-shadow: 0 4px 16px rgba(15,23,42,.1);
+  transition: left .2s ease, background .2s, color .2s, transform .2s;
 }
-body.kaav2-admin .sidebar-collapse-btn:hover { color: #fff; background: rgba(255,255,255,.12); }
-body.kaav2-admin.sidebar-collapsed .sidebar { width: 88px; }
+body.kaav2-admin.sidebar-collapsed .sidebar-collapse-btn {
+  left: calc(var(--kaav2-sidebar-w-collapsed) - 14px);
+}
+body.kaav2-admin.sidebar-collapsed .sidebar-collapse-btn i {
+  transform: rotate(180deg);
+}
+body.kaav2-admin .sidebar-collapse-btn:hover { color: var(--kaav2-accent-d); border-color: #cbd5e1; }
+@media (min-width: 901px) {
+  body.kaav2-admin .sidebar-collapse-btn { display: flex; }
+}
+body.kaav2-admin.sidebar-collapsed #appSidebar.sidebar { width: var(--kaav2-sidebar-w-collapsed); }
 body.kaav2-admin.sidebar-collapsed .sidebar-nav span,
 body.kaav2-admin.sidebar-collapsed .sidebar-header,
 body.kaav2-admin.sidebar-collapsed .user-info h3,
 body.kaav2-admin.sidebar-collapsed .user-info p,
 body.kaav2-admin.sidebar-collapsed .kaah-brand__text { display: none; }
+body.kaav2-admin.sidebar-collapsed .kaah-brand { justify-content: center; padding-left: 12px; padding-right: 12px; }
+body.kaav2-admin.sidebar-collapsed .sidebar-nav a {
+  justify-content: center;
+  padding: 12px 10px;
+}
+body.kaav2-admin.sidebar-collapsed .sidebar-nav a i { margin: 0; }
 
 /* Sidebar */
 body.kaav2-admin #appSidebar.sidebar {
@@ -81,7 +100,7 @@ body.kaav2-admin #appSidebar.sidebar {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 280px;
+  width: var(--kaav2-sidebar-w);
   background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
   color: #e2e8f0;
   z-index: 100;
@@ -176,12 +195,12 @@ body.kaav2-admin .sidebar-nav li.active a { box-shadow: inset 3px 0 0 var(--kaav
 
 /* Main */
 body.kaav2-admin .main-content {
-  margin-left: 280px;
+  margin-left: var(--kaav2-sidebar-w);
   min-height: 100vh;
   padding: 28px 32px 48px;
   transition: margin-left .2s ease;
 }
-body.kaav2-admin.sidebar-collapsed .main-content { margin-left: 88px; }
+body.kaav2-admin.sidebar-collapsed .main-content { margin-left: var(--kaav2-sidebar-w-collapsed); }
 
 body.kaav2-admin .dashboard-header {
   display: flex;
@@ -560,13 +579,26 @@ body.kaav2-admin .text-muted { color: var(--kaav2-muted); font-size: .88rem; }
 body.kaav2-admin .text-center { text-align: center; }
 body.kaav2-admin .text-danger { color: #b91c1c; }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  body.kaav2-admin #appSidebar.sidebar { transform: translateX(-100%); }
+/* Responsive — align with legacy breakpoint (900px) */
+@media (max-width: 900px) {
+  body.kaav2-admin #appSidebar.sidebar {
+    transform: translateX(-100%);
+    width: min(300px, 88vw);
+  }
   body.kaav2-admin.sidebar-open #appSidebar.sidebar { transform: translateX(0); }
-  body.kaav2-admin .main-content { margin-left: 0 !important; padding: 72px 18px 40px; }
+  body.kaav2-admin .main-content {
+    margin-left: 0 !important;
+    padding: 72px 18px 40px;
+  }
+  body.kaav2-admin .main-content > .alert,
+  body.kaav2-admin .main-content > .stats-grid,
+  body.kaav2-admin .main-content > .section {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
   body.kaav2-admin .mobile-menu-toggle { display: flex; }
-  body.kaav2-admin .sidebar-collapse-btn { display: none; }
+  body.kaav2-admin .sidebar-collapse-btn { display: none !important; }
+  body.kaav2-admin .dashboard-header { padding-left: 72px; }
 }
 
 @media (max-width: 640px) {
