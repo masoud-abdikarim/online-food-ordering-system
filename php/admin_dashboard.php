@@ -594,7 +594,7 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                 </li>
                 <li>
                     <a href="#delivery-assignment" onclick="showSection('delivery-assignment'); return false;">
-                        <span class="kaah-sidenav__ico ph ph-hourglass-high" aria-hidden="true"></span><span class="kaah-sidenav__text">Waiting assignment</span>
+                        <span class="kaah-sidenav__ico ph ph-timer" aria-hidden="true"></span><span class="kaah-sidenav__text">Waiting assignment</span>
                     </a>
                 </li>
                 <li>

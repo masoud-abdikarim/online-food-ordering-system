@@ -64,6 +64,11 @@ body.kaav2-delivery aside.sidebar.kaah-sidenav {
 /* ─── Shell layout ─── */
 aside.sidebar.kaah-sidenav {
   font-family: var(--ksb-font);
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
   width: var(--ksb-w) !important;
   background: var(--ksb-surface) !important;
   border-right: 1px solid var(--ksb-surface-border) !important;
@@ -72,6 +77,7 @@ aside.sidebar.kaah-sidenav {
   flex-direction: column;
   padding: 0 !important;
   overflow-x: hidden;
+  overflow-y: auto;
   transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
@@ -462,8 +468,16 @@ body.sidebar-collapsed .sidebar-collapse-btn i {
     margin-left: 0 !important;
   }
 
-  .kaah-sidenav-collapse-btn {
+  body.kaav2-admin .sidebar-collapse-btn,
+  body.kaav2-customer .sidebar-collapse-btn,
+  body.kaav2-delivery .sidebar-collapse-btn {
     display: none !important;
+  }
+
+  body.kaav2-admin .dashboard-header,
+  body.kaav2-customer .dashboard-header,
+  body.kaav2-delivery .dashboard-header {
+    padding-left: 72px;
   }
 
   /* Restore text in drawer */
@@ -481,4 +495,51 @@ body.sidebar-collapsed .sidebar-collapse-btn i {
   body.sidebar-collapsed aside.sidebar.kaah-sidenav .sidebar-nav a {
     justify-content: flex-start !important;
   }
+}
+
+/* Delivery dashboard: overlay + hamburger (main page uses dark theme) */
+body.kaav2-delivery .sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 18, 15, 0.55);
+  z-index: 90;
+  backdrop-filter: blur(4px);
+}
+body.kaav2-delivery.sidebar-open .sidebar-overlay {
+  display: block;
+}
+
+body.kaav2-delivery .mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 120;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 12px;
+  background: #102823;
+  color: #5ee9b5;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+body.kaav2-delivery .mobile-menu-toggle .ph {
+  font-size: 1.25rem;
+}
+
+/* Hamburger: normalize <button> vs <div> from legacy markup */
+body.kaav2-admin .mobile-menu-toggle,
+body.kaav2-customer .mobile-menu-toggle {
+  border: none;
+  background: #fff;
+  font: inherit;
+  color: inherit;
+}
+body.kaav2-customer .mobile-menu-toggle .ph,
+body.kaav2-admin .mobile-menu-toggle .ph {
+  font-size: 1.25rem;
 }

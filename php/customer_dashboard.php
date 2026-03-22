@@ -60,8 +60,10 @@ if ($__sn === '' || $__sn[0] !== '/') {
 $__app_root = str_replace('\\', '/', dirname(dirname($__sn)));
 if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
     $customer_css_href = '/css/kaah-customer-v2.css';
+    $kaah_sidebar_css_href = '/css/kaah-sidebar-system.css';
 } else {
     $customer_css_href = rtrim($__app_root, '/') . '/css/kaah-customer-v2.css';
+    $kaah_sidebar_css_href = rtrim($__app_root, '/') . '/css/kaah-sidebar-system.css';
 }
 ?>
 <!DOCTYPE html>
@@ -74,66 +76,69 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="<?php echo htmlspecialchars($customer_css_href, ENT_QUOTES, 'UTF-8'); ?>">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($kaah_sidebar_css_href, ENT_QUOTES, 'UTF-8'); ?>">
 </head>
 <body class="kaav2-customer">
     <div class="sidebar-overlay" onclick="document.body.classList.remove('sidebar-open')" aria-hidden="true"></div>
-    <!-- Mobile Menu Toggle -->
-    <div class="mobile-menu-toggle" onclick="toggleSidebar()" aria-label="Open menu">
-        <i class="fas fa-bars"></i>
-    </div>
+    <button type="button" class="mobile-menu-toggle" onclick="toggleSidebar()" aria-label="Open menu"><span class="ph ph-list" aria-hidden="true"></span></button>
+    <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar" aria-label="Collapse sidebar"><span class="ph ph-caret-double-left" aria-hidden="true"></span></button>
     
     <!-- Cart Overlay -->
     <div class="cart-overlay" onclick="closeCart()"></div>
     
-    <!-- Fixed Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar kaah-sidenav" id="appSidebar">
         <div class="kaah-brand">
-            <div class="kaah-brand__logo"><i class="fas fa-utensils"></i></div>
+            <div class="kaah-brand__logo"><span class="ph ph-cooking-pot" aria-hidden="true"></span></div>
             <div class="kaah-brand__text">
                 <strong>Kaah Fast Food</strong>
-                <span><i class="fas fa-location-dot"></i> New Hargeisa</span>
+                <span><span class="ph ph-map-pin" aria-hidden="true"></span> New Hargeisa</span>
             </div>
         </div>
         
         <div class="user-info">
             <div class="user-avatar">
-                <i class="fas fa-user-circle"></i>
+                <span class="ph ph-user-circle" aria-hidden="true"></span>
             </div>
-            <h3><?php echo htmlspecialchars($user_name); ?></h3>
-            <p>Welcome back!</p>
+            <div>
+                <h3><?php echo htmlspecialchars($user_name); ?></h3>
+                <p>Welcome back!</p>
+            </div>
         </div>
-        
+
         <nav class="sidebar-nav">
             <ul>
+                <li class="kaah-sidenav__group" aria-hidden="true"><span class="kaah-sidenav__group-label">Order</span></li>
                 <li class="active">
                     <a href="#orders" onclick="showTab('orders'); return false;">
-                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                        <span class="kaah-sidenav__ico ph ph-house" aria-hidden="true"></span><span class="kaah-sidenav__text">Dashboard</span>
                     </a>
                 </li>
                 <li>
                     <a href="#orders" onclick="showTab('orders'); return false;">
-                        <i class="fas fa-shopping-bag"></i> My Orders
+                        <span class="kaah-sidenav__ico ph ph-shopping-bag" aria-hidden="true"></span><span class="kaah-sidenav__text">My Orders</span>
                     </a>
                 </li>
                 <li>
                     <a href="#menu" onclick="showTab('menu'); return false;">
-                        <i class="fas fa-utensils"></i> Order Food
+                        <span class="kaah-sidenav__ico ph ph-bowl-food" aria-hidden="true"></span><span class="kaah-sidenav__text">Order Food</span>
                     </a>
                 </li>
                 <li>
                     <a href="#cart" onclick="openCart(); return false;">
-                        <i class="fas fa-shopping-cart"></i> My Cart
+                        <span class="kaah-sidenav__ico ph ph-shopping-cart-simple" aria-hidden="true"></span><span class="kaah-sidenav__text">My Cart</span>
                         <span class="cart-badge" id="sidebarCartCount"><?php echo $cart_count; ?></span>
                     </a>
                 </li>
+                <li class="kaah-sidenav__group" aria-hidden="true"><span class="kaah-sidenav__group-label">Account</span></li>
                 <li>
                     <a href="customer_profile.php">
-                        <i class="fas fa-user"></i> Profile
+                        <span class="kaah-sidenav__ico ph ph-identification-card" aria-hidden="true"></span><span class="kaah-sidenav__text">Profile</span>
                     </a>
                 </li>
-                <li>
+                <li class="kaah-sidenav__logout">
                     <a href="logout.php">
-                        <i class="fas fa-sign-out-alt"></i> Logout
+                        <span class="kaah-sidenav__ico ph ph-sign-out" aria-hidden="true"></span><span class="kaah-sidenav__text">Logout</span>
                     </a>
                 </li>
             </ul>
@@ -673,6 +678,11 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
         function toggleSidebar() {
             document.body.classList.toggle('sidebar-open');
         }
+
+        document.getElementById('sidebarCollapseBtn')?.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.body.classList.toggle('sidebar-collapsed');
+        });
 
         // Show/hide tabs
         function showTab(tabName) {

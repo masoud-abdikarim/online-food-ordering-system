@@ -177,8 +177,10 @@ if ($__sn === '' || $__sn[0] !== '/') {
 $__app_root = str_replace('\\', '/', dirname(dirname($__sn)));
 if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
     $delivery_css_href = '/css/kaah-delivery-v2.css';
+    $kaah_sidebar_css_href = '/css/kaah-sidebar-system.css';
 } else {
     $delivery_css_href = rtrim($__app_root, '/') . '/css/kaah-delivery-v2.css';
+    $kaah_sidebar_css_href = rtrim($__app_root, '/') . '/css/kaah-sidebar-system.css';
 }
 ?>
 
@@ -192,47 +194,56 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="<?php echo htmlspecialchars($delivery_css_href, ENT_QUOTES, 'UTF-8'); ?>">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($kaah_sidebar_css_href, ENT_QUOTES, 'UTF-8'); ?>">
 </head>
 <body class="kaav2-delivery">
+    <div class="sidebar-overlay" onclick="document.body.classList.remove('sidebar-open')" aria-hidden="true"></div>
+    <button type="button" class="mobile-menu-toggle" onclick="toggleSidebar()" aria-label="Open menu"><span class="ph ph-list" aria-hidden="true"></span></button>
+    <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar" aria-label="Collapse sidebar"><span class="ph ph-caret-double-left" aria-hidden="true"></span></button>
     <div class="dashboard-container">
-        <aside class="sidebar">
+        <aside class="sidebar kaah-sidenav" id="appSidebar">
             <div class="kaah-brand">
-                <div class="kaah-brand__logo"><i class="fas fa-motorcycle"></i></div>
+                <div class="kaah-brand__logo"><span class="ph ph-moped" aria-hidden="true"></span></div>
                 <div class="kaah-brand__text">
                     <strong>Kaah Fast Food</strong>
-                    <span><i class="fas fa-location-dot"></i> New Hargeisa · Delivery</span>
+                    <span><span class="ph ph-map-pin" aria-hidden="true"></span> New Hargeisa · Delivery</span>
                 </div>
             </div>
             
             <div class="user-info">
                 <div class="user-avatar">
-                    <i class="fas fa-user"></i>
+                    <span class="ph ph-user" aria-hidden="true"></span>
                 </div>
-                <h3><?php echo htmlspecialchars($user_name); ?></h3>
-                <p>Delivery Partner</p>
-                <p><small>ID: <?php echo $user_id; ?></small></p>
+                <div>
+                    <h3><?php echo htmlspecialchars($user_name); ?></h3>
+                    <p>Delivery Partner</p>
+                    <p><small>ID: <?php echo $user_id; ?></small></p>
+                </div>
             </div>
             
             <nav class="sidebar-nav">
                 <ul>
+                    <li class="kaah-sidenav__group" aria-hidden="true"><span class="kaah-sidenav__group-label">Routes</span></li>
                     <li class="active">
                         <a href="#assigned-orders" onclick="showSection('assigned-orders'); return false;">
-                            <i class="fas fa-clipboard-list"></i> Active deliveries
+                            <span class="kaah-sidenav__ico ph ph-package" aria-hidden="true"></span><span class="kaah-sidenav__text">Active deliveries</span>
                         </a>
                     </li>
                     <li>
                         <a href="#completed-deliveries" onclick="showSection('completed-deliveries'); return false;">
-                            <i class="fas fa-circle-check"></i> Completed
+                            <span class="kaah-sidenav__ico ph ph-check-circle" aria-hidden="true"></span><span class="kaah-sidenav__text">Completed</span>
                         </a>
                     </li>
+                    <li class="kaah-sidenav__group" aria-hidden="true"><span class="kaah-sidenav__group-label">Account</span></li>
                     <li>
                         <a href="delivery_profile.php">
-                            <i class="fas fa-user"></i> My Profile
+                            <span class="kaah-sidenav__ico ph ph-user-circle" aria-hidden="true"></span><span class="kaah-sidenav__text">My Profile</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="kaah-sidenav__logout">
                         <a href="logout.php">
-                            <i class="fas fa-sign-out-alt"></i> Logout
+                            <span class="kaah-sidenav__ico ph ph-sign-out" aria-hidden="true"></span><span class="kaah-sidenav__text">Logout</span>
                         </a>
                     </li>
                 </ul>
@@ -496,6 +507,15 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
 
     <script src="../js/session_idle.js" defer></script>
     <script>
+        function toggleSidebar() {
+            document.body.classList.toggle('sidebar-open');
+        }
+
+        document.getElementById('sidebarCollapseBtn')?.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.body.classList.toggle('sidebar-collapsed');
+        });
+
         // Show/hide sections
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => {
