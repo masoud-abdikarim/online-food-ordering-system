@@ -142,11 +142,10 @@ function kaah_redirect_unauthenticated($mode, $timed_out = false) {
         echo json_encode([
             'success' => false,
             'error' => $timed_out ? 'session_expired' : 'Unauthorized',
-            'redirect' => 'login.php' . ($timed_out ? '?timeout=1' : ''),
+            'redirect' => 'login.php',
         ]);
         exit;
     }
-    $qs = $timed_out ? '?timeout=1' : '';
-    header('Location: login.php' . $qs);
+    header('Location: login.php');
     exit;
 }

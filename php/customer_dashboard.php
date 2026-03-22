@@ -59,9 +59,9 @@ if ($__sn === '' || $__sn[0] !== '/') {
 }
 $__app_root = str_replace('\\', '/', dirname(dirname($__sn)));
 if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
-    $customer_css_href = '/css/kaah-customer.css';
+    $customer_css_href = '/css/kaah-customer-v2.css';
 } else {
-    $customer_css_href = rtrim($__app_root, '/') . '/css/kaah-customer.css';
+    $customer_css_href = rtrim($__app_root, '/') . '/css/kaah-customer-v2.css';
 }
 ?>
 <!DOCTYPE html>
@@ -73,10 +73,9 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo htmlspecialchars($customer_css_href, ENT_QUOTES, 'UTF-8'); ?>">
 </head>
-<body class="kaah-customer">
+<body class="kaav2-customer">
     <div class="sidebar-overlay" onclick="document.body.classList.remove('sidebar-open')" aria-hidden="true"></div>
     <!-- Mobile Menu Toggle -->
     <div class="mobile-menu-toggle" onclick="toggleSidebar()" aria-label="Open menu">
@@ -900,9 +899,9 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                 if (response.status === 401) {
                     try {
                         const j = await response.json();
-                        window.location.href = (j && j.redirect) ? j.redirect : 'login.php?timeout=1';
+                        window.location.href = (j && j.redirect) ? j.redirect : 'login.php';
                     } catch (e) {
-                        window.location.href = 'login.php?timeout=1';
+                        window.location.href = 'login.php';
                     }
                     return null;
                 }
@@ -962,9 +961,9 @@ if ($__app_root === '/' || $__app_root === '.' || $__app_root === '\\') {
                         if (response.status === 401) {
                             try {
                                 const j = await response.json();
-                                window.location.href = (j && j.redirect) ? j.redirect : 'login.php?timeout=1';
+                                window.location.href = (j && j.redirect) ? j.redirect : 'login.php';
                             } catch (e) {
-                                window.location.href = 'login.php?timeout=1';
+                                window.location.href = 'login.php';
                             }
                             return null;
                         }

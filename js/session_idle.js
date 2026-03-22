@@ -5,7 +5,7 @@
 (function () {
   var IDLE_MS = 5 * 60 * 1000;
   var WARN_MS = 4 * 60 * 1000;
-  var LOGIN_URL = 'login.php?timeout=1';
+  var LOGIN_URL = 'login.php';
   var THROTTLE_MS = 400;
 
   var idleTimer = null;

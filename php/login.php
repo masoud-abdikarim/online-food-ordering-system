@@ -3,7 +3,6 @@ require_once __DIR__ . '/session_bootstrap.php';
 
 $errors = [];
 $old_phone = '';
-$session_timeout_notice = isset($_GET['timeout']) && $_GET['timeout'] === '1';
 
 // Check for previous errors
 if(isset($_SESSION['login_errors'])) {
@@ -348,14 +347,6 @@ if(isset($_POST['submit'])){
 
             <h1>Login to your account</h1>
             <p class="subtitle">Use your registered phone number and password.</p>
-
-            <?php if (!empty($session_timeout_notice)): ?>
-                <div class="error-alert" style="background:#eff6ff;border-color:#bfdbfe;color:#1e3a5f;">
-                    <ul style="list-style:none;margin:0;padding:0;">
-                        <li><i class="fas fa-clock" style="margin-right:6px;"></i> Your session ended after 5 minutes of inactivity. Please sign in again.</li>
-                    </ul>
-                </div>
-            <?php endif; ?>
 
             <?php if(!empty($errors)): ?>
                 <div class="error-alert">
